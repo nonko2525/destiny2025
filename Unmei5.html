@@ -12,140 +12,222 @@
 
 <style>
   :root { --gold:#ffd700; }
-  * { box-sizing: border-box; }
-  body{
-    margin:0;height:100vh;overflow:hidden;
-    display:flex;flex-direction:column;justify-content:center;align-items:center;
-    background:radial-gradient(circle at center,#1c0d0d 0%,#000 80%);
-    font-family:'Playfair Display',serif;
-    color:var(--gold);
+
+  /* 画面フィット用の外枠。中身(.stage)をscaleで等倍縮小/拡大する */
+  body {
+    margin: 0;
+    background: #000;
+    height: 100svh; /* モバイルでもアドレスバー除く実質高さ */
+    display: grid;
+    place-items: center; /* 画面中央に配置 */
+    overflow: hidden;
+    font-family: 'Playfair Display', serif;
+    color: var(--gold);
   }
+
+  /* 基準 1280x720 のステージキャンバス（ここをスケーリング） */
+  .stage-wrap {
+    position: relative;
+    width: 100vw;
+    height: 100svh;
+    overflow: hidden; /* スケール時のはみ出し防止 */
+  }
+  .stage {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 1280px;     /* 基準幅 */
+    height: 720px;     /* 基準高 */
+    transform-origin: center center;
+    /* scaleはJSで設定します */
+    background: radial-gradient(circle at center, #1c0d0d 0%, #000 80%);
+    border-radius: 10px;
+    box-shadow: 0 0 40px rgba(255,215,0,0.08) inset;
+  }
+
+  /* ===== ステージ内UI ===== */
   h1{
-    font-size:clamp(40px,8vw,72px);
-    text-shadow:0 0 25px rgba(255,215,0,1);
-    letter-spacing:3px;margin:24px 16px 8px;
+    position: absolute;
+    left: 50%;
+    top: 40px;
+    transform: translateX(-50%);
+    margin: 0;
+    font-size: 72px;
+    letter-spacing: 3px;
+    text-shadow: 0 0 25px rgba(255,215,0,1);
   }
-  p{
-    font-size:clamp(14px,2.5vw,22px);
-    letter-spacing:2px;margin:0 16px 8px;text-align:center;
-    text-shadow:0 0 15px rgba(255,215,0,0.8);
+  .subtitle{
+    position: absolute;
+    left: 50%; top: 120px;
+    transform: translateX(-50%);
+    margin: 0;
+    font-size: 22px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 15px rgba(255,215,0,0.8);
+    text-align: center;
   }
 
   .slot{
-    position:absolute;top:12%;left:50%;transform:translateX(-50%);
-    display:flex;gap:clamp(8px,2vw,16px);flex-wrap:wrap;
-    max-width:min(100vw,900px);padding:0 8px;
+    position: absolute;
+    left: 50%;
+    top: 160px;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 16px;
   }
   .slot-box{
-    width:clamp(92px,16vw,140px);height:clamp(76px,10vw,110px);
-    background:linear-gradient(180deg,#2a1b1b,#3a0303);
-    border:2px solid var(--gold);border-radius:12px;
-    color:var(--gold);font-weight:700;font-size:clamp(14px,2.2vw,20px);
-    display:flex;align-items:center;justify-content:center;text-align:center;
-    box-shadow:0 0 15px rgba(255,215,0,0.45);user-select:none;
-    transition:filter .2s, box-shadow .2s;
+    width: 120px; height: 100px;
+    background: linear-gradient(180deg,#2a1b1b,#3a0303);
+    border: 2px solid var(--gold); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    text-align: center;
+    font-weight: 700; font-size: 20px;
+    box-shadow: 0 0 15px rgba(255,215,0,0.45);
+    user-select: none;
+    transition: filter .2s, box-shadow .2s;
   }
-  .spinning{filter:saturate(1.2) brightness(1.1);box-shadow:0 0 18px rgba(255,215,0,0.6)}
-  .stopped{filter:none}
+  .spinning{ filter: saturate(1.2) brightness(1.1); box-shadow: 0 0 18px rgba(255,215,0,0.6); }
+  .stopped { filter: none; }
 
-  /* 🎹 鍵盤（見えなくなっていたのでCSSも復活） */
+  .cta{
+    position: absolute;
+    left: 50%; top: 340px;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg,#8b0000,#b30000);
+    color: var(--gold);
+    border: 2px solid var(--gold);
+    border-radius: 12px;
+    padding: 14px 36px;
+    font-size: 24px;
+    cursor: pointer;
+    text-shadow: 0 0 12px rgba(255,215,0,0.8);
+    box-shadow: 0 0 25px rgba(255,215,0,0.35);
+    transition: transform .25s, box-shadow .25s, filter .25s;
+    z-index: 5;
+  }
+  .cta:hover{ transform: translateX(-50%) translateY(-1px) scale(1.04); box-shadow: 0 0 35px rgba(255,215,0,0.8); filter: brightness(1.05); }
+  .cta:active{ transform: translateX(-50%) translateY(0) scale(0.98); box-shadow: 0 0 22px rgba(255,215,0,0.6); }
+
+  /* 鍵盤（ユーザーの並びを維持） */
   .keys{
-    position:absolute;bottom:0;left:50%;transform:translateX(-50%);
-    display:flex;gap:2px;padding:8px 0 10px;pointer-events:none;
-    z-index:1;
+    position: absolute; left: 50%; bottom: 0;
+    transform: translateX(-50%);
+    display: flex; gap: 2px; padding: 8px 0 10px;
+    pointer-events: none;
   }
   .key{
-    width:64px;height:280px;background:linear-gradient(to bottom,#fff,#ddd);
-    border:1px solid #444;border-radius:4px;position:relative;
-    box-shadow:0 4px 10px rgba(255,255,255,0.08);
+    width: 64px; height: 280px;
+    background: linear-gradient(to bottom,#fff,#ddd);
+    border: 1px solid #444; border-radius: 4px;
+    position: relative;
+    box-shadow: 0 4px 10px rgba(255,255,255,0.08);
   }
   .key.black{
-    width:42px;height:180px;background:linear-gradient(to bottom,#111,#000);
-    margin:0 -21px;z-index:2;border-color:#222;box-shadow:0 4px 10px rgba(0,0,0,0.35);
+    width: 42px; height: 180px;
+    background: linear-gradient(to bottom,#111,#000);
+    margin: 0 -21px; z-index: 2; border-color: #222;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.35);
   }
-  .flash{box-shadow:0 0 22px rgba(255,215,0,0.9)!important;filter:brightness(2) saturate(1.2)}
+  .flash{ box-shadow: 0 0 22px rgba(255,215,0,0.9)!important; filter: brightness(2) saturate(1.2); }
 
-  button.cta{
-    position:relative;z-index:5;margin-top:clamp(16px,6vh,100px);
-    background:linear-gradient(90deg,#8b0000,#b30000);color:var(--gold);
-    border:2px solid var(--gold);border-radius:12px;
-    padding:14px 36px;font-size:clamp(16px,3.4vw,24px);cursor:pointer;
-    text-shadow:0 0 12px rgba(255,215,0,0.8);
-    box-shadow:0 0 25px rgba(255,215,0,0.35);
-    transition:transform .25s,box-shadow .25s,filter .25s;
+  .footer-note{
+    position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%);
+    font-size: 14px; opacity: .85;
   }
-  button.cta:hover{transform:translateY(-1px) scale(1.04);box-shadow:0 0 35px rgba(255,215,0,0.8);filter:brightness(1.05)}
-  button.cta:active{transform:translateY(0) scale(0.98);box-shadow:0 0 22px rgba(255,215,0,0.6)}
 
-  .footer-note{position:absolute;bottom:8px;font-size:12px;opacity:.85}
-
-  .result-line,.result-summary{
-    position:absolute;left:50%;transform:translateX(-50%);
-    text-shadow:0 0 18px rgba(255,215,0,0.9);opacity:0;transition:opacity .9s ease;
-    text-align:center;white-space:pre-wrap;letter-spacing:2px
+  .result-line, .result-summary{
+    position: absolute; left: 50%; transform: translateX(-50%);
+    text-shadow: 0 0 18px rgba(255,215,0,0.9); opacity: 0; transition: opacity .9s ease;
+    text-align: center; white-space: pre-wrap; letter-spacing: 2px;
   }
-  .result-line{top:65%;font-size:28px}
-  .result-summary{top:74%;font-size:22px}
-  .show{opacity:1}
+  .result-line{ top: 460px; font-size: 28px; }
+  .result-summary{ top: 520px; font-size: 22px; }
+  .show{ opacity: 1; }
+
+  /* 背景（ステージ外）は真っ黒 */
+  .page-bg { position: fixed; inset: 0; background: #000; z-index: -1; }
 </style>
 </head>
 <body>
-  <h1>Unmei</h1>
-  <p>出会いが鳴り、恋が奏でる運命</p>
+  <div class="page-bg"></div>
 
-  <div class="slot" aria-live="polite">
-    <div class="slot-box" data-field="height">身長</div>
-    <div class="slot-box" data-field="face">顔</div>
-    <div class="slot-box" data-field="mbti">MBTI</div>
-    <div class="slot-box" data-field="age">年齢</div>
-    <div class="slot-box" data-field="country">国籍</div>
+  <div class="stage-wrap">
+    <div class="stage" id="stage">
+      <h1>Unmei</h1>
+      <p class="subtitle">出会いが鳴り、恋が奏でる運命</p>
+
+      <div class="slot" aria-live="polite">
+        <div class="slot-box" data-field="height">身長</div>
+        <div class="slot-box" data-field="face">顔</div>
+        <div class="slot-box" data-field="mbti">MBTI</div>
+        <div class="slot-box" data-field="age">年齢</div>
+        <div class="slot-box" data-field="country">国籍</div>
+      </div>
+
+      <button class="cta" aria-label="運命を奏でる（スタート）">運命を奏でる</button>
+
+      <!-- 🔊 同階層に置いたMP3 -->
+      <audio id="bgm" preload="auto">
+        <source src="beethoven_symphony5_1.mp3" type="audio/mpeg" />
+      </audio>
+
+      <!-- 🎹 鍵盤（指定の並び） -->
+      <div class="keys" aria-hidden="true">
+        <div class="key"></div>
+        <div class="key black"></div>
+        <div class="key"></div>
+        <div class="key black"></div>
+        <div class="key"></div>
+        <div class="key"></div>
+        <div class="key black"></div>
+        <div class="key"></div>
+        <div class="key black"></div>
+        <div class="key"></div>
+        <div class="key black"></div>
+        <div class="key"></div>
+        <div class="key"></div>
+        <div class="key black"></div>
+        <div class="key"></div>
+        <div class="key black"></div>
+        <div class="key"></div>
+        <div class="key"></div>
+        <div class="key black"></div>
+        <div class="key"></div>
+        <div class="key black"></div>
+        <div class="key"></div>
+        <div class="key black"></div>
+        <div class="key"></div>
+        <div class="key"></div>
+        <div class="key black"></div>
+        <div class="key"></div>
+        <div class="key black"></div>
+        <div class="key"></div>
+      </div>
+
+      <div class="footer-note">© 2025 Unmei Project</div>
+
+      <!-- 結果テキスト（JSで内容を入れる） -->
+      <div class="result-line" id="resultLine">あなたの運命の相手は...</div>
+      <div class="result-summary" id="resultSummary"></div>
+    </div>
   </div>
-
-  <button class="cta" aria-label="運命を奏でる（スタート）">運命を奏でる</button>
-
-  <!-- 🔊 同階層に置いたMP3 -->
-  <audio id="bgm" preload="auto">
-    <source src="beethoven_symphony5_1.mp3" type="audio/mpeg" />
-  </audio>
-
-  <!-- 🎹 鍵盤（ユーザー指定の並びをそのまま復元） -->
-  <div class="keys" aria-hidden="true">
-    <div class="key"></div>
-    <div class="key black"></div>
-    <div class="key"></div>
-    <div class="key black"></div>
-    <div class="key"></div>
-    <div class="key"></div>
-    <div class="key black"></div>
-    <div class="key"></div>
-    <div class="key black"></div>
-    <div class="key"></div>
-    <div class="key black"></div>
-    <div class="key"></div>
-    <div class="key"></div>
-    <div class="key black"></div>
-    <div class="key"></div>
-    <div class="key black"></div>
-    <div class="key"></div>
-    <div class="key"></div>
-    <div class="key black"></div>
-    <div class="key"></div>
-    <div class="key black"></div>
-    <div class="key"></div>
-    <div class="key black"></div>
-    <div class="key"></div>
-    <div class="key"></div>
-    <div class="key black"></div>
-    <div class="key"></div>
-    <div class="key black"></div>
-    <div class="key"></div>
-  </div>
-
-  <div class="footer-note">© 2025 Unmei Project</div>
 
 <script>
 (function(){
-  // ===== ランダム候補 =====
+  /* ===== ステージを常に画面内に収めるスケーリング ===== */
+  const stage = document.getElementById('stage');
+  const BASE_W = 1280, BASE_H = 720;
+  function fitStage(){
+    const sw = window.innerWidth;
+    const sh = window.innerHeight; // 100svhに近い
+    const scale = Math.min(sw / BASE_W, sh / BASE_H);
+    stage.style.transform = `translate(-50%, -50%) scale(${scale})`;
+  }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  fitStage();
+
+  /* ===== 既存のゲームロジック ===== */
   const faces = ["しお顔","ソース顔","とんこつ顔","砂糖顔","しょうゆ顔","塩バター顔"];
   const mbti  = ["INTJ","INFP","ENTP","ENFJ","ISTP","ISFP","ESTJ","ESFP","ISTJ","INFJ","ENTJ","ENFP","ISFJ","ESFJ","ESTP","INTP"];
   const countries = ["日本","韓国","フランス","イギリス","ドイツ","イタリア","アメリカ","ブラジル","エジプト","タイ","スペイン","カナダ","オーストラリア"];
@@ -154,45 +236,33 @@
   const keys  = Array.from(document.querySelectorAll(".keys .key"));
   const btn   = document.querySelector(".cta");
   const bgm   = document.getElementById("bgm");
+  const line = document.getElementById("resultLine");
+  const summary = document.getElementById("resultSummary");
 
-  // ===== 表示テキスト =====
-  const line = document.createElement("div");
-  line.className = "result-line";
-  line.textContent = "あなたの運命の相手は...";
-  document.body.appendChild(line);
-
-  const summary = document.createElement("div");
-  summary.className = "result-summary";
-  document.body.appendChild(summary);
-
-  // ===== キュー（ms）—必要なら微調整OK =====
   const cues = {
-    line:     1500,  // たたたたーん → 「あなたの運命の相手は…」
-    height:   4200,  // たらららたらららーん → 身長
-    face:     7500,  // たらららたらららーん → 顔
-    mbti:     9800,  // たたたたーん → MBTI
-    age:     12100,  // たたたたーん → 年齢
-    country: 14500,  // たたたたん  → 国籍
-    summary: 17500   // たったたーん → まとめ
+    line:     1500,   // あなたの運命の相手は...
+    height:   4200,   // 身長
+    face:     7500,   // 顔
+    mbti:     9800,   // MBTI
+    age:     12100,   // 年齢
+    country:  14500,  // 国籍
+    summary:  17500   // まとめ
   };
 
-  // ===== タイマー/スピナー管理 =====
   const timeouts = [];
   const spinners = [];
   function schedule(fn, delayMs, startMs){
-    const h=setTimeout(fn, Math.max(0, startMs + delayMs - performance.now()));
+    const h = setTimeout(fn, Math.max(0, startMs + delayMs - performance.now()));
     timeouts.push(h);
   }
   function clearAll(){
     while(timeouts.length){ clearTimeout(timeouts.pop()); }
-    spinners.splice(0).forEach(id=>clearInterval(id));
+    spinners.splice(0).forEach(id => clearInterval(id));
   }
   function flashKey(){
     const k = keys[Math.floor(Math.random()*keys.length)];
     if(!k) return; k.classList.add("flash"); setTimeout(()=>k.classList.remove("flash"), 120);
   }
-
-  // ===== スロット回転・停止 =====
   function startSpin(){
     boxes.forEach((box)=>{
       box.classList.add("spinning");
@@ -216,7 +286,6 @@
     return boxes[i].textContent;
   }
 
-  // ===== 実行シーケンス =====
   async function runSequence(){
     clearAll();
     line.classList.remove("show");
@@ -224,7 +293,7 @@
     summary.textContent="";
     boxes.forEach(b=>b.classList.remove("stopped"));
 
-    // 音源準備
+    // 音源準備待ち
     await new Promise((resolve)=>{
       const ok=()=>{ bgm.removeEventListener("canplaythrough", ok); resolve(); };
       bgm.addEventListener("canplaythrough", ok, {once:true});
@@ -241,7 +310,6 @@
       return;
     }
 
-    // 回転開始 & キューで順停止
     startSpin();
     const start = performance.now();
 
@@ -261,7 +329,6 @@
     }, cues.summary, start);
   }
 
-  // ===== ボタン =====
   let busy=false;
   btn.addEventListener("click", async ()=>{
     if (busy) return; busy=true;
@@ -271,4 +338,3 @@
 </script>
 </body>
 </html>
-
