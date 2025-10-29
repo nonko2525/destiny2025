@@ -1,106 +1,75 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Unmei - 出会いが鳴り、恋が奏でる運命</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Unmei - 出会いが鳴り、恋が奏でる運命</title>
 
-  <!-- Playfair Display（統一フォント） -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 
-  <style>
-    :root { --gold:#ffd700; }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; height: 100vh; overflow: hidden;
-      display: flex; flex-direction: column; justify-content: center; align-items: center;
-      background: radial-gradient(circle at center, #1c0d0d 0%, #000 80%);
-      font-family: 'Playfair Display', serif;
-    }
-    h1 {
-      font-size: clamp(40px, 8vw, 72px);
-      color: var(--gold); text-shadow: 0 0 25px rgba(255,215,0,1);
-      letter-spacing: 3px; margin: 24px 16px 8px;
-      animation: fadeIn 1.2s ease forwards;
-    }
-    p {
-      font-size: clamp(14px, 2.5vw, 22px);
-      color: var(--gold); letter-spacing: 2px; margin: 0 16px 8px;
-      text-align: center; text-shadow: 0 0 15px rgba(255,215,0,0.8);
-      opacity: 0; animation: subtitle 1s ease .5s forwards;
-    }
-    @keyframes fadeIn { from{opacity:0;transform:translateY(40px)} to{opacity:1;transform:translateY(0)} }
-    @keyframes subtitle { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+<style>
+  :root { --gold:#ffd700; }
+  * { box-sizing:border-box }
+  body{
+    margin:0;height:100vh;overflow:hidden;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;
+    background:radial-gradient(circle at center,#1c0d0d 0%,#000 80%);
+    font-family:'Playfair Display',serif;
+  }
+  h1{font-size:clamp(40px,8vw,72px);color:var(--gold);text-shadow:0 0 25px rgba(255,215,0,1);letter-spacing:3px;margin:24px 16px 8px;animation:fadeIn 1.2s ease forwards}
+  p{font-size:clamp(14px,2.5vw,22px);color:var(--gold);letter-spacing:2px;margin:0 16px 8px;text-align:center;text-shadow:0 0 15px rgba(255,215,0,0.8);opacity:0;animation:subtitle 1s ease .5s forwards}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes subtitle{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 
-    .slot {
-      position: absolute; top: 12%; left: 50%; transform: translateX(-50%);
-      display: flex; gap: clamp(8px, 2vw, 16px); flex-wrap: wrap;
-      max-width: min(100vw, 900px); padding: 0 8px; opacity: 0;
-      animation: slotFade 1s ease .8s forwards;
-    }
-    @keyframes slotFade { to{opacity:1} }
-    .slot-box {
-      width: clamp(92px, 16vw, 140px); height: clamp(76px, 10vw, 110px);
-      background: linear-gradient(180deg,#2a1b1b,#3a0303);
-      border: 2px solid var(--gold); border-radius: 12px;
-      color: var(--gold); font-weight: 700; font-size: clamp(14px, 2.2vw, 20px);
-      display: flex; align-items: center; justify-content: center; text-align:center;
-      box-shadow: 0 0 15px rgba(255,215,0,0.45);
-      transition: filter .2s, box-shadow .2s;
-      user-select: none;
-    }
-    .spinning { filter: saturate(1.2) brightness(1.1); box-shadow: 0 0 18px rgba(255,215,0,0.6); }
-    .stopped { filter: none; }
+  .slot{position:absolute;top:12%;left:50%;transform:translateX(-50%);
+        display:flex;gap:clamp(8px,2vw,16px);flex-wrap:wrap;max-width:min(100vw,900px);padding:0 8px;opacity:0;animation:slotFade 1s ease .8s forwards}
+  @keyframes slotFade{to{opacity:1}}
+  .slot-box{
+    width:clamp(92px,16vw,140px);height:clamp(76px,10vw,110px);
+    background:linear-gradient(180deg,#2a1b1b,#3a0303);border:2px solid var(--gold);border-radius:12px;
+    color:var(--gold);font-weight:700;font-size:clamp(14px,2.2vw,20px);
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    box-shadow:0 0 15px rgba(255,215,0,0.45);transition:filter .2s,box-shadow .2s;user-select:none
+  }
+  .spinning{filter:saturate(1.2) brightness(1.1);box-shadow:0 0 18px rgba(255,215,0,0.6)}
+  .stopped{filter:none}
 
-    .keys {
-      position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-      display: flex; gap: 2px; padding: 8px 0 10px; pointer-events: none;
-    }
-    .key {
-      width: 64px; height: 280px; background: linear-gradient(to bottom,#fff,#ddd);
-      border: 1px solid #444; border-radius: 4px; position: relative;
-      animation: play 6s infinite ease-in-out; box-shadow: 0 4px 10px rgba(255,255,255,0.08);
-    }
-    .key.black {
-      width: 42px; height: 180px; background: linear-gradient(to bottom,#111,#000);
-      margin: 0 -21px; z-index: 2; border-color:#222; box-shadow: 0 4px 10px rgba(0,0,0,0.35);
-      animation: playBlack 6s infinite ease-in-out;
-    }
-    @keyframes play { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.6)} }
-    @keyframes playBlack { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.3)} }
-    .flash { box-shadow: 0 0 22px rgba(255,215,0,0.9)!important; filter: brightness(2) saturate(1.2); }
+  .keys{position:absolute;bottom:0;left:50%;transform:translateX(-50%);display:flex;gap:2px;padding:8px 0 10px;pointer-events:none}
+  .key{width:64px;height:280px;background:linear-gradient(to bottom,#fff,#ddd);border:1px solid #444;border-radius:4px;position:relative;animation:play 6s infinite ease-in-out;box-shadow:0 4px 10px rgba(255,255,255,0.08)}
+  .key.black{width:42px;height:180px;background:linear-gradient(to bottom,#111,#000);margin:0 -21px;z-index:2;border-color:#222;box-shadow:0 4px 10px rgba(0,0,0,0.35);animation:playBlack 6s infinite ease-in-out}
+  @keyframes play{0%,100%{filter:brightness(1)}50%{filter:brightness(1.6)}}
+  @keyframes playBlack{0%,100%{filter:brightness(1)}50%{filter:brightness(1.3)}}
+  .flash{box-shadow:0 0 22px rgba(255,215,0,0.9)!important;filter:brightness(2) saturate(1.2)}
 
-    button.cta {
-      position: relative; z-index: 5;
-      margin-top: clamp(16px, 6vh, 100px);
-      background: linear-gradient(90deg,#8b0000,#b30000);
-      color: var(--gold); border: 2px solid var(--gold); border-radius: 12px;
-      padding: 14px 36px; font-size: clamp(16px, 3.4vw, 24px);
-      cursor: pointer; text-shadow: 0 0 12px rgba(255,215,0,0.8);
-      box-shadow: 0 0 25px rgba(255,215,0,0.35);
-      transition: transform .25s, box-shadow .25s, filter .25s;
-    }
-    button.cta:hover { transform: translateY(-1px) scale(1.04); box-shadow: 0 0 35px rgba(255,215,0,0.8); filter: brightness(1.05); }
-    button.cta:active { transform: translateY(0) scale(0.98); box-shadow: 0 0 22px rgba(255,215,0,0.6); }
+  button.cta{
+    position:relative;z-index:5;margin-top:clamp(16px,6vh,100px);
+    background:linear-gradient(90deg,#8b0000,#b30000);color:var(--gold);border:2px solid var(--gold);border-radius:12px;
+    padding:14px 36px;font-size:clamp(16px,3.4vw,24px);cursor:pointer;text-shadow:0 0 12px rgba(255,215,0,0.8);
+    box-shadow:0 0 25px rgba(255,215,0,0.35);transition:transform .25s,box-shadow .25s,filter .25s
+  }
+  button.cta:hover{transform:translateY(-1px) scale(1.04);box-shadow:0 0 35px rgba(255,215,0,0.8);filter:brightness(1.05)}
+  button.cta:active{transform:translateY(0) scale(0.98);box-shadow:0 0 22px rgba(255,215,0,0.6)}
 
-    .footer-note {
-      position: absolute; bottom: 8px; color: var(--gold); font-size: 12px;
-      text-shadow: 0 0 10px rgba(255,215,0,0.6); opacity: .85;
-    }
+  .footer-note{position:absolute;bottom:8px;color:var(--gold);font-size:12px;text-shadow:0 0 10px rgba(255,215,0,0.6);opacity:.85}
 
-    /* 結果テキスト */
-    .result-line, .result-summary {
-      position: absolute; left: 50%; transform: translateX(-50%);
-      color: var(--gold); text-shadow: 0 0 18px rgba(255,215,0,0.9); opacity: 0;
-      transition: opacity 0.9s ease;
-      text-align: center; white-space: pre-wrap; letter-spacing: 2px;
-    }
-    .result-line { top: 65%; font-size: 28px; }
-    .result-summary { top: 74%; font-size: 22px; }
-    .show { opacity: 1; }
-  </style>
+  .result-line,.result-summary{
+    position:absolute;left:50%;transform:translateX(-50%);
+    color:var(--gold);text-shadow:0 0 18px rgba(255,215,0,0.9);opacity:0;transition:opacity .9s ease;
+    text-align:center;white-space:pre-wrap;letter-spacing:2px
+  }
+  .result-line{top:65%;font-size:28px}
+  .result-summary{top:74%;font-size:22px}
+  .show{opacity:1}
+
+  /* 画面内エラー表示 */
+  .toast{
+    position:fixed;top:10px;left:50%;transform:translateX(-50%);
+    background:#300;color:#ffdede;border:1px solid #f88;padding:8px 12px;border-radius:8px;
+    font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.3);z-index:9999;max-width:90vw
+  }
+</style>
 </head>
 <body>
   <h1>Unmei</h1>
@@ -116,8 +85,12 @@
 
   <button class="cta" aria-label="運命を奏でる（スタート）">運命を奏でる</button>
 
-  <!-- BGM：アップロードしたMP4（同フォルダに置く） -->
-  <audio id="bgm" src="v14025g50000cn30p8nog65tnccspi1g.MP4" preload="auto"></audio>
+  <!-- 🔊 MP4をvideoで再生（表示は隠す） -->
+  <video id="bgm" preload="auto" playsinline style="position:absolute; width:1px; height:1px; opacity:0; pointer-events:none;">
+    <!-- 大文字・小文字どちらも試す（どちらか1つを残してOK） -->
+    <source src="v14025g50000cn30p8nog65tnccspi1g.MP4" type="video/mp4" />
+    <source src="v14025g50000cn30p8nog65tnccspi1g.mp4" type="video/mp4" />
+  </video>
 
   <div class="keys" aria-hidden="true">
     <div class="key"></div><div class="key black"></div><div class="key"></div><div class="key black"></div>
@@ -130,145 +103,158 @@
 
   <div class="footer-note">© 2025 Unmei Project</div>
 
-  <script>
-  (function(){
-    // ランダム表示データ
-    const faces = ["しお顔","ソース顔","とんこつ顔","砂糖顔","しょうゆ顔","塩バター顔"];
-    const mbti  = ["INTJ","INFP","ENTP","ENFJ","ISTP","ISFP","ESTJ","ESFP","ISTJ","INFJ","ENTJ","ENFP","ISFJ","ESFJ","ESTP","INTP"];
-    const countries = ["日本","韓国","フランス","イギリス","ドイツ","イタリア","アメリカ","ブラジル","エジプト","タイ","スペイン","カナダ","オーストラリア"];
+<script>
+(function(){
+  // ===== データ =====
+  const faces = ["しお顔","ソース顔","とんこつ顔","砂糖顔","しょうゆ顔","塩バター顔"];
+  const mbti  = ["INTJ","INFP","ENTP","ENFJ","ISTP","ISFP","ESTJ","ESFP","ISTJ","INFJ","ENTJ","ENFP","ISFJ","ESFJ","ESTP","INTP"];
+  const countries = ["日本","韓国","フランス","イギリス","ドイツ","イタリア","アメリカ","ブラジル","エジプト","タイ","スペイン","カナダ","オーストラリア"];
 
-    const boxes = Array.from(document.querySelectorAll(".slot-box"));
-    const keys  = Array.from(document.querySelectorAll(".keys .key"));
-    const btn   = document.querySelector(".cta");
-    const bgm   = document.getElementById("bgm");
+  const boxes = Array.from(document.querySelectorAll(".slot-box"));
+  const keys  = Array.from(document.querySelectorAll(".keys .key"));
+  const btn   = document.querySelector(".cta");
+  const bgm   = document.getElementById("bgm");
 
-    // 結果テキスト
-    const line = document.createElement("div");
-    line.className = "result-line";
-    line.textContent = "あなたの運命の相手は...";
-    document.body.appendChild(line);
+  // ===== 結果テキスト =====
+  const line = document.createElement("div");
+  line.className = "result-line";
+  line.textContent = "あなたの運命の相手は...";
+  document.body.appendChild(line);
 
-    const summary = document.createElement("div");
-    summary.className = "result-summary";
-    document.body.appendChild(summary);
+  const summary = document.createElement("div");
+  summary.className = "result-summary";
+  document.body.appendChild(summary);
 
-    // キュー（ミリ秒）—曲に合わせて調整
-    const cues = {
-      line:     1500,  // あなたの運命の相手は...
-      height:   4200,  // 身長
-      face:     7500,  // 顔
-      mbti:     9800,  // MBTI
-      age:     12100,  // 年齢
-      country: 14500,  // 国籍
-      summary: 17500   // まとめ表示
-    };
+  // ===== キュー（ms） =====
+  const cues = {
+    line:     1500,
+    height:   4200,
+    face:     7500,
+    mbti:     9800,
+    age:     12100,
+    country:  14500,
+    summary:  17500
+  };
 
-    // タイマー管理
-    const timeouts = [];
-    const spinners = [];
-    function clearAllTimeouts(){ while(timeouts.length){ clearTimeout(timeouts.pop()); } }
-    function schedule(fn, delayMs, startMs){
-      const handle = setTimeout(fn, Math.max(0, startMs + delayMs - performance.now()));
-      timeouts.push(handle);
-    }
-    function flashKey(){
-      const k = keys[Math.floor(Math.random()*keys.length)];
-      if (!k) return;
-      k.classList.add("flash");
-      setTimeout(()=>k.classList.remove("flash"), 120);
-    }
-
-    // スロット回転
-    function startSpin(){
-      boxes.forEach((box)=>{
-        box.classList.add("spinning");
-        const id = setInterval(()=>{
-          const f = box.dataset.field;
-          switch(f){
-            case "height":  box.textContent = (150 + Math.floor(Math.random()*51)) + "cm"; break;
-            case "face":    box.textContent = faces[Math.floor(Math.random()*faces.length)]; break;
-            case "mbti":    box.textContent = mbti[Math.floor(Math.random()*mbti.length)]; break;
-            case "age":     box.textContent = (18 + Math.floor(Math.random()*23)) + "歳"; break;
-            case "country": box.textContent = countries[Math.floor(Math.random()*countries.length)]; break;
-          }
-        }, 45);
-        spinners.push(id);
-      });
-    }
-    function stopBox(index){
-      if (spinners[index]) { clearInterval(spinners[index]); spinners[index] = null; }
-      boxes[index].classList.remove("spinning");
-      boxes[index].classList.add("stopped");
-      flashKey();
-      return boxes[index].textContent;
-    }
-
-    // 実行シーケンス（方式①：固定タイミング）
-    async function runSequence(){
-      // リセット
-      clearAllTimeouts();
-      summary.textContent = "";
-      line.classList.remove("show");
-      summary.classList.remove("show");
-      boxes.forEach(b=>b.classList.remove("stopped"));
-      spinners.splice(0).forEach(id=>clearInterval(id));
-
-      // 音を頭出しして再生（ユーザー操作後なのでモバイルでもOK）
-      try {
-        bgm.pause();
-        bgm.currentTime = 0;
-        await bgm.play();
-      } catch(e) {
-        console.warn("音声の自動再生がブロックされました。", e);
-        return;
-      }
-
-      // スロット回転開始
-      startSpin();
-
-      const start = performance.now();
-
-      // 1) たたたたーん → テキスト
-      schedule(()=>{ line.classList.add("show"); }, cues.line, start);
-
-      // 2) 身長
-      let picked = {height:"", face:"", mbti:"", age:"", country:""};
-      schedule(()=>{ picked.height  = stopBox(0); }, cues.height, start);
-
-      // 3) 顔
-      schedule(()=>{ picked.face    = stopBox(1); }, cues.face, start);
-
-      // 4) MBTI
-      schedule(()=>{ picked.mbti    = stopBox(2); }, cues.mbti, start);
-
-      // 5) 年齢
-      schedule(()=>{ picked.age     = stopBox(3); }, cues.age, start);
-
-      // 6) 国籍
-      schedule(()=>{ picked.country = stopBox(4); }, cues.country, start);
-
-      // 7) まとめ表示
-      schedule(()=>{
-        const label = `${picked.country} / ${picked.height} / ${picked.face} / ${picked.mbti} / ${picked.age}`;
-        summary.textContent = `おめでとうございます！\n${label}\nが運命の相手です。`;
-        summary.classList.add("show");
-      }, cues.summary, start);
-    }
-
-    // ボタン操作
-    let busy = false;
-    document.querySelector(".cta").addEventListener("click", async ()=>{
-      if (busy) return;
-      busy = true;
-      await runSequence();
-      // 曲の長さに合わせて適宜調整（ここは安全マージン）
-      setTimeout(()=>{ busy = false; }, 22000);
+  // ===== ユーティリティ =====
+  const timeouts = [];
+  const spinners = [];
+  function toast(msg){
+    const t=document.createElement("div"); t.className="toast"; t.textContent=msg; document.body.appendChild(t);
+    setTimeout(()=>t.remove(), 6000);
+  }
+  function clearAllTimeouts(){ while(timeouts.length){ clearTimeout(timeouts.pop()); } }
+  function schedule(fn, delayMs, startMs){
+    const h=setTimeout(fn, Math.max(0, startMs + delayMs - performance.now())); timeouts.push(h);
+  }
+  function flashKey(){
+    const k = keys[Math.floor(Math.random()*keys.length)];
+    if(!k) return; k.classList.add("flash"); setTimeout(()=>k.classList.remove("flash"), 120);
+  }
+  function startSpin(){
+    boxes.forEach((box)=>{
+      box.classList.add("spinning");
+      const id=setInterval(()=>{
+        const f=box.dataset.field;
+        switch(f){
+          case "height":  box.textContent=(150+Math.floor(Math.random()*51))+"cm"; break;
+          case "face":    box.textContent=faces[Math.floor(Math.random()*faces.length)]; break;
+          case "mbti":    box.textContent=mbti[Math.floor(Math.random()*mbti.length)]; break;
+          case "age":     box.textContent=(18+Math.floor(Math.random()*23))+"歳"; break;
+          case "country": box.textContent=countries[Math.floor(Math.random()*countries.length)]; break;
+        }
+      }, 45);
+      spinners.push(id);
     });
+  }
+  function stopBox(index){
+    if (spinners[index]) { clearInterval(spinners[index]); spinners[index]=null; }
+    boxes[index].classList.remove("spinning");
+    boxes[index].classList.add("stopped");
+    flashKey();
+    return boxes[index].textContent;
+  }
 
-    // 後片付け
-    window.addEventListener("pagehide", ()=>{ bgm.pause(); clearAllTimeouts(); });
-    window.addEventListener("beforeunload", ()=>{ bgm.pause(); clearAllTimeouts(); });
-  })();
-  </script>
+  // ===== 事前ロード確認（GitHub Pagesのパス/大小対策） =====
+  function ensureSourceExists(){
+    // どちらか片方の<source>だけ生き残らせてもOK
+    const sources = bgm.querySelectorAll("source");
+    sources.forEach(s=>{
+      const img = new Image(); // HEADリクエスト代わり
+      img.onload = ()=>{}; img.onerror = ()=>{
+        // 片方が404なら削除（ブラウザが存在する方を選びやすく）
+        s.remove();
+      };
+      img.src = s.src; // 画像としては失敗するが、404検出用の簡易トリック
+    });
+  }
+
+  // ===== 実行シーケンス =====
+  async function runSequence(){
+    clearAllTimeouts();
+    summary.textContent="";
+    line.classList.remove("show");
+    summary.classList.remove("show");
+    boxes.forEach(b=>b.classList.remove("stopped"));
+    spinners.splice(0).forEach(id=>clearInterval(id));
+
+    ensureSourceExists();
+
+    // Audioの読み込み完了を待ってから再生＆演出開始
+    try{
+      await new Promise((resolve, reject)=>{
+        const ok=()=>{ bgm.removeEventListener("canplaythrough",ok); resolve(); };
+        const fail=()=>{ bgm.removeEventListener("error",fail); reject(new Error("音源の読み込みに失敗しました")); };
+        bgm.addEventListener("canplaythrough", ok, {once:true});
+        bgm.addEventListener("error", fail, {once:true});
+        // 既に読み込まれている場合
+        if(bgm.readyState>=3){ resolve(); }
+      });
+    }catch(e){
+      toast("音源が読み込めません。ファイル名や配置フォルダ、拡張子の大文字/小文字を確認してください。");
+      return;
+    }
+
+    try{
+      bgm.pause();
+      bgm.currentTime = 0;
+      await bgm.play(); // クリック起点なのでモバイルでもOK
+    }catch(e){
+      toast("再生がブロックされました。もう一度ボタンを押してください。");
+      return;
+    }
+
+    startSpin();
+    const start = performance.now();
+
+    schedule(()=>{ line.classList.add("show"); }, cues.line, start);
+
+    let picked={height:"",face:"",mbti:"",age:"",country:""};
+    schedule(()=>{ picked.height  = stopBox(0); }, cues.height,  start);
+    schedule(()=>{ picked.face    = stopBox(1); }, cues.face,    start);
+    schedule(()=>{ picked.mbti    = stopBox(2); }, cues.mbti,    start);
+    schedule(()=>{ picked.age     = stopBox(3); }, cues.age,     start);
+    schedule(()=>{ picked.country = stopBox(4); }, cues.country, start);
+
+    schedule(()=>{
+      const label = `${picked.country} / ${picked.height} / ${picked.face} / ${picked.mbti} / ${picked.age}`;
+      summary.textContent = `おめでとうございます！\n${label}\nが運命の相手です。`;
+      summary.classList.add("show");
+    }, cues.summary, start);
+  }
+
+  // ===== ボタン =====
+  let busy=false;
+  btn.addEventListener("click", async ()=>{
+    if(busy) return; busy=true;
+    await runSequence();
+    setTimeout(()=>busy=false, 22000);
+  });
+
+  // ===== ページ遷移時後片付け =====
+  window.addEventListener("pagehide", ()=>{ bgm.pause(); clearAllTimeouts(); });
+  window.addEventListener("beforeunload", ()=>{ bgm.pause(); clearAllTimeouts(); });
+})();
+</script>
 </body>
 </html>
