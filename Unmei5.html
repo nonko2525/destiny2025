@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Unmei - 出会いが鳴り、恋が奏でる運命</title>
+
+<!-- フォント -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  :root { --gold:#ffd700; }
+  body {
+    margin: 0;
+    height: 100vh;
+    background: radial-gradient(circle at center, #1c0d0d 0%, #000 80%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-family: 'Playfair Display', serif;
+    color: var(--gold);
+    overflow: hidden;
+  }
+  h1 { font-size: 72px; text-shadow: 0 0 25px rgba(255,215,0,1); margin: 0; }
+  p { font-size: 22px; text-shadow: 0 0 15px rgba(255,215,0,0.8); }
+
+  .slot { position: absolute; top: 12%; display: flex; gap: 16px; opacity: 0; animation: slotFade 2s ease forwards 3s; }
+  .slot-box {
+    width: 120px; height: 100px;
+    background: linear-gradient(180deg,#2a1b1b,#3a0303);
+    border: 2px solid gold; border-radius: 10px;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 20px; font-weight: bold;
+    box-shadow: 0 0 15px rgba(255,215,0,0.5);
+  }
+
+  button {
+    position: relative;
+    margin-top: 100px;
+    background: linear-gradient(90deg, #8b0000, #b30000);
+    color: gold;
+    border: 2px solid gold;
+    padding: 16px 40px;
+    font-size: 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 0 25px rgba(255,215,0,0.4);
+    transition: 0.3s;
+  }
+  button:hover { transform: scale(1.05); box-shadow: 0 0 35px rgba(255,215,0,0.9); }
+
+  @keyframes slotFade { to { opacity: 1; } }
+
+  .footer-note { position: absolute; bottom: 8px; font-size: 14px; }
+
+  .result-text, .summary-text {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    text-shadow: 0 0 18px rgba(255,215,0,0.9);
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  .result-text { top: 65%; font-size: 28px; }
+  .summary-text { top: 74%; font-size: 22px; }
+  .show { opacity: 1; }
+</style>
+</head>
+
+<body>
+  <h1>Unmei</h1>
+  <p>出会いが鳴り、恋が奏でる運命</p>
+
+  <div class="slot">
+    <div class="slot-box">身長</div>
+    <div class="slot-box">顔</div>
+    <div class="slot-box">MBTI</div>
+    <div class="slot-box">年齢</div>
+    <div class="slot-box">国籍</div>
+  </div>
+
+  <button id="startBtn">運命を奏でる</button>
+
+  <div class="keys">
+    <div class="key"></div>
+    <div class="key black"></div>
+    <div class="key"></div>
+    <div class="key black"></div>
+    <div class="key"></div>
+    <div class="key"></div>
+    <div class="key black"></div>
+    <div class="key"></div>
+    <div class="key black"></div>
+    <div class="key"></div>
+    <div class="key black"></div>
+    <div class="key"></div>
+    <div class="key"></div>
+    <div class="key black"></div>
+    <div class="key"></div>
+    <div class="key black"></div>
+    <div class="key"></div>
+    <div class="key"></div>
+    <div class="key black"></div>
+    <div class="key"></div>
+    <div class="key black"></div>
+    <div class="key"></div>
+    <div class="key black"></div>
+    <div class="key"></div>
+    <div class="key"></div>
+    <div class="key black"></div>
+    <div class="key"></div>
+    <div class="key black"></div>
+    <div class="key"></div>
+  </div>
+
+  
+  <div class="footer-note">© 2025 Unmei Project</div>
+
+  <!--  アップロードした音源を使用 -->
+  <audio id="bgm" preload="auto" src="beethoven_symphony5_1.mp3"></audio>
+
+<script>
+(function(){
+  const faces = ["しお顔","ソース顔","とんこつ顔","砂糖顔","しょうゆ顔","塩バター顔"];
+  const mbti  = ["INTJ","INFP","ENTP","ENFJ","ISTP","ISFP","ESTJ","ESFP","INFJ","ENTJ","ENFP","ISFJ"];
+  const countries = ["日本","韓国","フランス","イギリス","ドイツ","イタリア","アメリカ","ブラジル","エジプト","タイ","スペイン","カナダ"];
+  const boxes = document.querySelectorAll(".slot-box");
+  const btn = document.getElementById("startBtn");
+  const bgm = document.getElementById("bgm");
+
+  const resultText = document.createElement("div");
+  resultText.className = "result-text";
+  resultText.textContent = "あなたの運命の相手は...";
+  document.body.appendChild(resultText);
+
+  const summaryText = document.createElement("div");
+  summaryText.className = "summary-text";
+  document.body.appendChild(summaryText);
+
+  function spinBoxes() {
+    boxes.forEach((box, i)=>{
+      const spinner = setInterval(()=>{
+        switch(i){
+          case 0: box.textContent = (150 + Math.floor(Math.random()*51)) + "cm"; break;
+          case 1: box.textContent = faces[Math.floor(Math.random()*faces.length)]; break;
+          case 2: box.textContent = mbti[Math.floor(Math.random()*mbti.length)]; break;
+          case 3: box.textContent = (18 + Math.floor(Math.random()*23)) + "歳"; break;
+          case 4: box.textContent = countries[Math.floor(Math.random()*countries.length)]; break;
+        }
+      }, 50);
+      box.dataset.spin = spinner;
+    });
+  }
+
+  function stopBox(index){
+    clearInterval(boxes[index].dataset.spin);
+  }
+
+  btn.addEventListener("click", async ()=>{
+    resultText.classList.remove("show");
+    summaryText.classList.remove("show");
+    summaryText.textContent = "";
+
+    // 音楽再生
+    bgm.currentTime = 0;
+    await bgm.play();
+
+    // たたたたーん
+    setTimeout(()=>resultText.classList.add("show"), 1500);
+
+    // スロット回転開始
+    spinBoxes();
+
+    // 順番に止める
+    setTimeout(()=>stopBox(0), 4200); // 身長
+    setTimeout(()=>stopBox(1), 7500); // 顔
+    setTimeout(()=>stopBox(2), 9800); // MBTI
+    setTimeout(()=>stopBox(3), 12100); // 年齢
+    setTimeout(()=>stopBox(4), 14500); // 国籍
+
+    // まとめ結果
+    setTimeout(()=>{
+      const result = Array.from(boxes).map(b => b.textContent).join(" / ");
+      summaryText.textContent = `おめでとうございます！\n${result}\nが運命の相手です。`;
+      summaryText.classList.add("show");
+    }, 17500);
+  });
+})();
+</script>
+</body>
+</html>
+
+</body>
+</html>
