@@ -5,22 +5,19 @@
   <title>Unmei - 出会いが鳴り、恋が奏でる運命</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    /* =========================
-       基本パラメータ（ここだけ変えれば全体連動）
-       ========================= */
+    /* ===== パラメータ ===== */
     :root{
-      --keysH: 380px;                 /* 鍵盤の高さ */
-      --keyW: 80px;                   /* 白鍵の幅   */
+      --keysH: 380px;                 /* 鍵盤の高さ（数値を上げると更に長く） */
+      --keyW: 80px;                   /* 白鍵の幅 */
       --blackH: calc(var(--keysH)*0.65);
-      --stageBg1:#1c0d0d;             /* 背景・深紅 */
-      --stageBg2:#000000;             /* 背景・黒   */
+      --stageBg1:#1c0d0d;             /* 深紅 */
+      --stageBg2:#000000;             /* 黒   */
       --gold:#ffd700;
       --goldGlow: rgba(255,215,0,.9);
       --cardBg1:#2a1b1b;
       --cardBg2:#3a0303;
     }
 
-    /* ===== 全体 ===== */
     *{box-sizing:border-box}
     body{
       margin:0;
@@ -29,12 +26,12 @@
       display:flex; flex-direction:column; align-items:center; justify-content:center;
       font-family: "Playfair Display", serif;
       color: var(--gold);
-      /* 下に鍵盤ぶんの余白を確保（ボタン重なり防止） */
+      /* 鍵盤ぶんの余白でボタンと非干渉 */
       padding-bottom: calc(var(--keysH) + 32px);
       overflow:hidden;
     }
 
-    /* ===== タイトル & サブタイトル ===== */
+    /* タイトル */
     h1{
       font-size: clamp(42px, 7vw, 74px);
       margin: 0 0 8px;
@@ -55,7 +52,7 @@
       white-space: nowrap;
     }
 
-    /* ===== スロットのプレビュー列 ===== */
+    /* スロットのプレビュー */
     .slot{
       position: absolute; top: 10%;
       display:flex; gap: clamp(8px,1.6vw,16px);
@@ -71,9 +68,26 @@
       color: var(--gold); font-weight:700; font-size: clamp(14px, 2.4vw, 20px);
       box-shadow: 0 0 15px rgba(255,215,0,0.45);
       text-align:center;
+      transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
     }
 
-    /* ===== 鍵盤 ===== */
+    /* 追加：スロット回転＆停止の演出 */
+    .slot-box.spinning{
+      animation: spinGlow .6s linear infinite;
+      filter: drop-shadow(0 0 8px rgba(255,215,0,.55));
+    }
+    .slot-box.stopped{
+      animation: none;
+      box-shadow: 0 0 18px rgba(255,215,0,.85);
+      transform: scale(1.03);
+    }
+    @keyframes spinGlow{
+      0%{ box-shadow: 0 0 6px rgba(255,215,0,.2); }
+      50%{ box-shadow: 0 0 16px rgba(255,215,0,.6); }
+      100%{ box-shadow: 0 0 6px rgba(255,215,0,.2); }
+    }
+
+    /* 鍵盤 */
     .keys{
       position: fixed; left:50%; transform: translateX(-50%);
       bottom:0; display:flex; gap:2px; z-index:1;
@@ -87,6 +101,7 @@
       border: 1px solid #444;
       border-radius: 4px;
       animation: play 6s infinite ease-in-out;
+      transition: filter .12s linear, box-shadow .12s linear;
     }
     .key.black{
       width: calc(var(--keyW) * 0.62);
@@ -97,8 +112,13 @@
       margin-right: calc(var(--keyW) * -0.31);
       animation: playBlack 6s infinite ease-in-out;
     }
+    /* 追加：鍵盤フラッシュ */
+    .key.flash{
+      filter: brightness(2.2) saturate(1.2);
+      box-shadow: 0 0 30px rgba(255,215,0,.8);
+    }
 
-    /* ===== ボタン ===== */
+    /* ボタン */
     .cta{
       position: relative; z-index:3;
       margin-top: clamp(40px, 7vh, 100px);
@@ -116,23 +136,22 @@
     .cta:hover{ transform: translateY(-2px); box-shadow: 0 0 36px rgba(255,215,0,.9); }
     .cta:active{ transform: translateY(0); }
 
-    /* ===== フッター ===== */
+    /* フッター */
     .footer-note{
       position: fixed; bottom:8px; left:50%; transform: translateX(-50%);
       font-size: 14px; color: var(--gold);
       text-shadow: 0 0 10px rgba(255,215,0,.6);
-      opacity:.85;
-      pointer-events:none;
+      opacity:.85; pointer-events:none;
     }
 
-    /* ===== アニメーション ===== */
+    /* アニメーション */
     @keyframes fadeIn{ from{opacity:0; transform:translateY(16px)} to{opacity:1; transform:translateY(0)} }
     @keyframes subtitle{ from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:translateY(0)} }
     @keyframes slotFade{ to{opacity:1} }
     @keyframes play{ 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.9)} }
     @keyframes playBlack{ 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.5)} }
 
-    /* ===== レスポンシブ調整 ===== */
+    /* レスポンシブ */
     @media (max-width: 900px){
       :root{ --keysH: 300px; --keyW: 64px; }
     }
@@ -144,7 +163,7 @@
 </head>
 <body>
   <!-- スロット・プレビュー -->
-  <div class="slot" aria-hidden="true">
+  <div class="slot" aria-hidden="false">
     <div class="slot-box">身長</div>
     <div class="slot-box">顔</div>
     <div class="slot-box">MBTI</div>
@@ -159,9 +178,9 @@
   <!-- CTA -->
   <button class="cta" type="button">運命を奏でる</button>
 
-  <!-- 鍵盤（ビジュアルのみ） -->
+  <!-- 鍵盤 -->
   <div class="keys" aria-hidden="true">
-    <!-- 好きな数だけ並べてOK（ざっくり白鍵・黒鍵の並び） -->
+    <!-- 白鍵・黒鍵の並び（見た目重視なので適量でOK） -->
     <div class="key"></div><div class="key black"></div><div class="key"></div>
     <div class="key"></div><div class="key black"></div><div class="key"></div>
     <div class="key"></div><div class="key black"></div><div class="key"></div>
@@ -173,14 +192,142 @@
   <!-- フッター -->
   <div class="footer-note">© 2025 Unmei Project</div>
 
-  <!-- クリック時の今後の拡張用（BGM/画面遷移などをここに実装していける） -->
+  <!-- クリック後の演出（BGM/スロット停止/結果テキスト） -->
   <script>
-    document.querySelector('.cta').addEventListener('click', () => {
-      // ここに「スロット画面へ遷移」や「BGM開始」処理を追加していく
-      // 例）location.href = 'slot.html';
-      // 例）WebAudioでBeethovenモチーフを再生 など
-      console.log('Unmei: Start clicked');
+  (function(){
+    // ===== データ定義 =====
+    const faces = ["しお顔","ソース顔","とんこつ顔","砂糖顔"];
+    const mbti  = ["INTJ","INFP","ENTP","ENFJ","ISTP","ISFP","ESTJ","ESFP"];
+    const countries = ["日本","韓国","フランス","イギリス","ドイツ","イタリア","アメリカ","ブラジル","エジプト","タイ"];
+
+    const boxes = Array.from(document.querySelectorAll(".slot-box"));
+    const keys  = Array.from(document.querySelectorAll(".keys .key"));
+    const btn   = document.querySelector(".cta");
+
+    // “あなたの運命の相手は...” テキスト
+    const resultText = document.createElement("div");
+    resultText.textContent = "あなたの運命の相手は...";
+    Object.assign(resultText.style, {
+      position: "absolute",
+      top: "65%",
+      left: "50%",
+      transform: "translateX(-50%)",
+      color: "var(--gold)",
+      fontSize: "28px",
+      letterSpacing: "3px",
+      textShadow: "0 0 18px rgba(255,215,0,0.9)",
+      opacity: 0,
+      transition: "opacity 1.2s ease",
+      pointerEvents: "none"
     });
+    document.body.appendChild(resultText);
+
+    // ===== スロット回転ユーティリティ =====
+    const spinners = [];
+    function startSpin() {
+      boxes.forEach((box, i)=>{
+        box.classList.add("spinning");
+        const id = setInterval(()=>{
+          switch(i){
+            case 0: box.textContent = (150 + Math.floor(Math.random()*51)) + "cm"; break;
+            case 1: box.textContent = faces[Math.floor(Math.random()*faces.length)]; break;
+            case 2: box.textContent = mbti[Math.floor(Math.random()*mbti.length)]; break;
+            case 3: box.textContent = (18 + Math.floor(Math.random()*23)) + "歳"; break;
+            case 4: box.textContent = countries[Math.floor(Math.random()*countries.length)]; break;
+          }
+        }, 50);
+        spinners[i] = id;
+      });
+    }
+    function stopOne(index){
+      clearInterval(spinners[index]);
+      boxes[index].classList.remove("spinning");
+      boxes[index].classList.add("stopped");
+    }
+
+    // ===== Web Audio：運命モチーフ風 =====
+    let ac, master;
+    function initAudio(){
+      if (ac) return;
+      ac = new (window.AudioContext || window.webkitAudioContext)();
+      master = ac.createGain();
+      master.gain.value = 0.18;  // 全体音量
+      master.connect(ac.destination);
+    }
+    // G4,G4,G4,Eb4（簡易）＋休符
+    const motif = [
+      {freq:392, dur:0.28}, {rest:0.08},
+      {freq:392, dur:0.28}, {rest:0.08},
+      {freq:392, dur:0.28}, {rest:0.14},
+      {freq:311, dur:0.44}, {rest:0.32}
+    ];
+    function playTone(freq, start, dur, type="square"){
+      const osc = ac.createOscillator();
+      const g = ac.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      g.gain.setValueAtTime(0, start);
+      g.gain.linearRampToValueAtTime(1, start+0.02);
+      g.gain.linearRampToValueAtTime(0.0001, start+dur);
+      osc.connect(g); g.connect(master);
+      osc.start(start);
+      osc.stop(start+dur+0.02);
+    }
+
+    function playFateAndStopSequence(){
+      initAudio();
+      const t0 = ac.currentTime + 0.05;
+      let cursor = t0;
+      let stopIndex = 0;
+
+      motif.forEach(step=>{
+        if (step.freq){
+          playTone(step.freq, cursor, step.dur, step.freq===311 ? "sawtooth" : "square");
+
+          // ランダム鍵盤を光らせる
+          const k = keys[Math.floor(Math.random()*keys.length)];
+          if (k){
+            setTimeout(()=>{
+              k.classList.add("flash");
+              setTimeout(()=>k.classList.remove("flash"), 120);
+            }, (cursor - ac.currentTime)*1000);
+          }
+
+          // 音の終わりでスロットを順停止
+          setTimeout(()=>{
+            if (stopIndex < boxes.length){
+              stopOne(stopIndex++);
+            }
+          }, (cursor + step.dur - ac.currentTime)*1000);
+
+          cursor += step.dur;
+        } else if (step.rest){
+          cursor += step.rest;
+        }
+      });
+
+      // 最後の余韻で全停止→「あなたの運命の相手は…」フェードイン
+      setTimeout(()=>{
+        while (stopIndex < boxes.length){ stopOne(stopIndex++); }
+        setTimeout(()=>{ resultText.style.opacity = 1; }, 300);
+      }, (cursor - ac.currentTime + 0.30)*1000);
+    }
+
+    // ===== クリックで開始 =====
+    let running = false;
+    btn.addEventListener("click", ()=>{
+      if (running) return;
+      running = true;
+      resultText.style.opacity = 0;               // 毎回リセット
+      boxes.forEach(b=>b.classList.remove("stopped"));
+
+      startSpin();                                 // 1) スロット回転
+      playFateAndStopSequence();                   // 2) モチーフ再生＆順停止
+
+      // 任意：数秒後に再プレイ可能に
+      setTimeout(()=>{ running = false; }, 6000);
+    });
+  })();
   </script>
 </body>
 </html>
