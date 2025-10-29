@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>Unmei - 出会いが鳴り、恋が奏でる運命</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    /* =========================
+       基本パラメータ（ここだけ変えれば全体連動）
+       ========================= */
+    :root{
+      --keysH: 380px;                 /* 鍵盤の高さ */
+      --keyW: 80px;                   /* 白鍵の幅   */
+      --blackH: calc(var(--keysH)*0.65);
+      --stageBg1:#1c0d0d;             /* 背景・深紅 */
+      --stageBg2:#000000;             /* 背景・黒   */
+      --gold:#ffd700;
+      --goldGlow: rgba(255,215,0,.9);
+      --cardBg1:#2a1b1b;
+      --cardBg2:#3a0303;
+    }
+
+    /* ===== 全体 ===== */
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100dvh;
+      background: radial-gradient(circle at center, var(--stageBg1) 0%, var(--stageBg2) 80%);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      font-family: "Playfair Display", serif;
+      color: var(--gold);
+      /* 下に鍵盤ぶんの余白を確保（ボタン重なり防止） */
+      padding-bottom: calc(var(--keysH) + 32px);
+      overflow:hidden;
+    }
+
+    /* ===== タイトル & サブタイトル ===== */
+    h1{
+      font-size: clamp(42px, 7vw, 74px);
+      margin: 0 0 8px;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+      text-shadow: 0 0 25px var(--goldGlow);
+      animation: fadeIn 1.6s ease forwards;
+    }
+    .subtitle{
+      font-size: clamp(16px, 2.2vw, 22px);
+      margin: 0 0 10px;
+      color: var(--gold);
+      letter-spacing: 0.14em;
+      opacity: 0;
+      text-shadow: 0 0 14px rgba(255,215,0,.8);
+      animation: subtitle 1.2s ease forwards;
+      animation-delay: .6s;
+      white-space: nowrap;
+    }
+
+    /* ===== スロットのプレビュー列 ===== */
+    .slot{
+      position: absolute; top: 10%;
+      display:flex; gap: clamp(8px,1.6vw,16px);
+      opacity:0; animation: slotFade .9s ease forwards; animation-delay: .9s;
+    }
+    .slot-box{
+      width: clamp(88px, 14vw, 120px);
+      height: clamp(72px, 12vw, 100px);
+      background: linear-gradient(180deg, var(--cardBg1), var(--cardBg2));
+      border: 2px solid var(--gold);
+      border-radius: 10px;
+      display:flex; align-items:center; justify-content:center;
+      color: var(--gold); font-weight:700; font-size: clamp(14px, 2.4vw, 20px);
+      box-shadow: 0 0 15px rgba(255,215,0,0.45);
+      text-align:center;
+    }
+
+    /* ===== 鍵盤 ===== */
+    .keys{
+      position: fixed; left:50%; transform: translateX(-50%);
+      bottom:0; display:flex; gap:2px; z-index:1;
+      filter: drop-shadow(0 10px 24px rgba(0,0,0,.55));
+      user-select:none; pointer-events:none;
+    }
+    .key{
+      width: var(--keyW);
+      height: var(--keysH);
+      background: linear-gradient(to bottom, #fff, #e7e7e7);
+      border: 1px solid #444;
+      border-radius: 4px;
+      animation: play 6s infinite ease-in-out;
+    }
+    .key.black{
+      width: calc(var(--keyW) * 0.62);
+      height: var(--blackH);
+      background: linear-gradient(to bottom, #111, #000);
+      position: relative; z-index: 2; top: 0;
+      margin-left: calc(var(--keyW) * -0.31);
+      margin-right: calc(var(--keyW) * -0.31);
+      animation: playBlack 6s infinite ease-in-out;
+    }
+
+    /* ===== ボタン ===== */
+    .cta{
+      position: relative; z-index:3;
+      margin-top: clamp(40px, 7vh, 100px);
+      padding: 16px 40px;
+      font-size: clamp(18px, 2.6vw, 24px);
+      color: var(--gold);
+      background: linear-gradient(90deg, #8b0000, #b30000);
+      border: 2px solid var(--gold);
+      border-radius: 10px;
+      cursor: pointer;
+      text-shadow: 0 0 12px rgba(255,215,0,.85);
+      box-shadow: 0 0 25px rgba(255,215,0,.4);
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .cta:hover{ transform: translateY(-2px); box-shadow: 0 0 36px rgba(255,215,0,.9); }
+    .cta:active{ transform: translateY(0); }
+
+    /* ===== フッター ===== */
+    .footer-note{
+      position: fixed; bottom:8px; left:50%; transform: translateX(-50%);
+      font-size: 14px; color: var(--gold);
+      text-shadow: 0 0 10px rgba(255,215,0,.6);
+      opacity:.85;
+      pointer-events:none;
+    }
+
+    /* ===== アニメーション ===== */
+    @keyframes fadeIn{ from{opacity:0; transform:translateY(16px)} to{opacity:1; transform:translateY(0)} }
+    @keyframes subtitle{ from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:translateY(0)} }
+    @keyframes slotFade{ to{opacity:1} }
+    @keyframes play{ 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.9)} }
+    @keyframes playBlack{ 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.5)} }
+
+    /* ===== レスポンシブ調整 ===== */
+    @media (max-width: 900px){
+      :root{ --keysH: 300px; --keyW: 64px; }
+    }
+    @media (max-width: 600px){
+      :root{ --keysH: 220px; --keyW: 48px; }
+      .slot{ top: 7%; }
+    }
+  </style>
+</head>
+<body>
+  <!-- スロット・プレビュー -->
+  <div class="slot" aria-hidden="true">
+    <div class="slot-box">身長</div>
+    <div class="slot-box">顔</div>
+    <div class="slot-box">MBTI</div>
+    <div class="slot-box">年齢</div>
+    <div class="slot-box">国籍</div>
+  </div>
+
+  <!-- タイトル -->
+  <h1>Unmei</h1>
+  <p class="subtitle">出会いが鳴り、恋が奏でる運命</p>
+
+  <!-- CTA -->
+  <button class="cta" type="button">運命を奏でる</button>
+
+  <!-- 鍵盤（ビジュアルのみ） -->
+  <div class="keys" aria-hidden="true">
+    <!-- 好きな数だけ並べてOK（ざっくり白鍵・黒鍵の並び） -->
+    <div class="key"></div><div class="key black"></div><div class="key"></div>
+    <div class="key"></div><div class="key black"></div><div class="key"></div>
+    <div class="key"></div><div class="key black"></div><div class="key"></div>
+    <div class="key black"></div><div class="key"></div><div class="key black"></div>
+    <div class="key"></div><div class="key"></div><div class="key black"></div>
+    <div class="key"></div><div class="key black"></div><div class="key"></div>
+  </div>
+
+  <!-- フッター -->
+  <div class="footer-note">© 2025 Unmei Project</div>
+
+  <!-- クリック時の今後の拡張用（BGM/画面遷移などをここに実装していける） -->
+  <script>
+    document.querySelector('.cta').addEventListener('click', () => {
+      // ここに「スロット画面へ遷移」や「BGM開始」処理を追加していく
+      // 例）location.href = 'slot.html';
+      // 例）WebAudioでBeethovenモチーフを再生 など
+      console.log('Unmei: Start clicked');
+    });
+  </script>
+</body>
+</html>
