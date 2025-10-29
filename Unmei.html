@@ -190,6 +190,145 @@
     <div class="key"></div>
   </div>
 
+ <!-- フッター -->
   <div class="footer-note">© 2025 Unmei Project</div>
+
+  <!-- クリック後の演出（BGM/スロット停止/結果テキスト） -->
+  <script>
+  (function(){
+    // ===== データ定義 =====
+    const faces = ["しお顔","ソース顔","とんこつ顔","砂糖顔"];
+    const mbti  = ["INTJ","INFP","ENTP","ENFJ","ISTP","ISFP","ESTJ","ESFP"];
+    const countries = ["日本","韓国","フランス","イギリス","ドイツ","イタリア","アメリカ","ブラジル","エジプト","タイ"];
+
+    const boxes = Array.from(document.querySelectorAll(".slot-box"));
+    const keys  = Array.from(document.querySelectorAll(".keys .key"));
+    const btn   = document.querySelector(".cta");
+
+    // “あなたの運命の相手は...” テキスト
+    const resultText = document.createElement("div");
+    resultText.textContent = "あなたの運命の相手は...";
+    Object.assign(resultText.style, {
+      position: "absolute",
+      top: "65%",
+      left: "50%",
+      transform: "translateX(-50%)",
+      color: "var(--gold)",
+      fontSize: "28px",
+      letterSpacing: "3px",
+      textShadow: "0 0 18px rgba(255,215,0,0.9)",
+      opacity: 0,
+      transition: "opacity 1.2s ease",
+      pointerEvents: "none"
+    });
+    document.body.appendChild(resultText);
+
+    // ===== スロット回転ユーティリティ =====
+    const spinners = [];
+    function startSpin() {
+      boxes.forEach((box, i)=>{
+        box.classList.add("spinning");
+        const id = setInterval(()=>{
+          switch(i){
+            case 0: box.textContent = (150 + Math.floor(Math.random()*51)) + "cm"; break;
+            case 1: box.textContent = faces[Math.floor(Math.random()*faces.length)]; break;
+            case 2: box.textContent = mbti[Math.floor(Math.random()*mbti.length)]; break;
+            case 3: box.textContent = (18 + Math.floor(Math.random()*23)) + "歳"; break;
+            case 4: box.textContent = countries[Math.floor(Math.random()*countries.length)]; break;
+          }
+        }, 50);
+        spinners[i] = id;
+      });
+    }
+    function stopOne(index){
+      clearInterval(spinners[index]);
+      boxes[index].classList.remove("spinning");
+      boxes[index].classList.add("stopped");
+    }
+
+    // ===== Web Audio：運命モチーフ風 =====
+    let ac, master;
+    function initAudio(){
+      if (ac) return;
+      ac = new (window.AudioContext || window.webkitAudioContext)();
+      master = ac.createGain();
+      master.gain.value = 0.18;  // 全体音量
+      master.connect(ac.destination);
+    }
+    // G4,G4,G4,Eb4（簡易）＋休符
+    const motif = [
+      {freq:392, dur:0.28}, {rest:0.08},
+      {freq:392, dur:0.28}, {rest:0.08},
+      {freq:392, dur:0.28}, {rest:0.14},
+      {freq:311, dur:0.44}, {rest:0.32}
+    ];
+    function playTone(freq, start, dur, type="square"){
+      const osc = ac.createOscillator();
+      const g = ac.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      g.gain.setValueAtTime(0, start);
+      g.gain.linearRampToValueAtTime(1, start+0.02);
+      g.gain.linearRampToValueAtTime(0.0001, start+dur);
+      osc.connect(g); g.connect(master);
+      osc.start(start);
+      osc.stop(start+dur+0.02);
+    }
+
+    function playFateAndStopSequence(){
+      initAudio();
+      const t0 = ac.currentTime + 0.05;
+      let cursor = t0;
+      let stopIndex = 0;
+
+      motif.forEach(step=>{
+        if (step.freq){
+          playTone(step.freq, cursor, step.dur, step.freq===311 ? "sawtooth" : "square");
+
+          // ランダム鍵盤を光らせる
+          const k = keys[Math.floor(Math.random()*keys.length)];
+          if (k){
+            setTimeout(()=>{
+              k.classList.add("flash");
+              setTimeout(()=>k.classList.remove("flash"), 120);
+            }, (cursor - ac.currentTime)*1000);
+          }
+
+          // 音の終わりでスロットを順停止
+          setTimeout(()=>{
+            if (stopIndex < boxes.length){
+              stopOne(stopIndex++);
+            }
+          }, (cursor + step.dur - ac.currentTime)*1000);
+
+          cursor += step.dur;
+        } else if (step.rest){
+          cursor += step.rest;
+        }
+      });
+
+      // 最後の余韻で全停止→「あなたの運命の相手は…」フェードイン
+      setTimeout(()=>{
+        while (stopIndex < boxes.length){ stopOne(stopIndex++); }
+        setTimeout(()=>{ resultText.style.opacity = 1; }, 300);
+      }, (cursor - ac.currentTime + 0.30)*1000);
+    }
+
+    // ===== クリックで開始 =====
+    let running = false;
+    btn.addEventListener("click", ()=>{
+      if (running) return;
+      running = true;
+      resultText.style.opacity = 0;               // 毎回リセット
+      boxes.forEach(b=>b.classList.remove("stopped"));
+
+      startSpin();                                 // 1) スロット回転
+      playFateAndStopSequence();                   // 2) モチーフ再生＆順停止
+
+      // 任意：数秒後に再プレイ可能に
+      setTimeout(()=>{ running = false; }, 6000);
+    });
+  })();
+  </script>
 </body>
 </html>
