@@ -116,7 +116,7 @@
 
   <button class="cta" aria-label="運命を奏でる（スタート）">運命を奏でる</button>
 
-  <!-- ✅ BGM：アップロードしたMP4（同フォルダに置く） -->
+  <!-- BGM：アップロードしたMP4（同フォルダに置く） -->
   <audio id="bgm" src="v14025g50000cn30p8nog65tnccspi1g.MP4" preload="auto"></audio>
 
   <div class="keys" aria-hidden="true">
@@ -132,7 +132,7 @@
 
   <script>
   (function(){
-    // ===== ランダム表示データ =====
+    // ランダム表示データ
     const faces = ["しお顔","ソース顔","とんこつ顔","砂糖顔","しょうゆ顔","塩バター顔"];
     const mbti  = ["INTJ","INFP","ENTP","ENFJ","ISTP","ISFP","ESTJ","ESFP","ISTJ","INFJ","ENTJ","ENFP","ISFJ","ESFJ","ESTP","INTP"];
     const countries = ["日本","韓国","フランス","イギリス","ドイツ","イタリア","アメリカ","ブラジル","エジプト","タイ","スペイン","カナダ","オーストラリア"];
@@ -152,10 +152,7 @@
     summary.className = "result-summary";
     document.body.appendChild(summary);
 
-    // ===== キュー（ミリ秒） =====
-    // ここを曲に合わせて微調整してください。
-    // たたたたーん -> line、たらららたらららーん -> height / face、
-    // たたたたーん -> mbti / age、たたたたん -> country、たったたーん -> summary
+    // キュー（ミリ秒）—曲に合わせて調整
     const cues = {
       line:     1500,  // あなたの運命の相手は...
       height:   4200,  // 身長
@@ -166,12 +163,10 @@
       summary: 17500   // まとめ表示
     };
 
-    // ===== ユーティリティ =====
+    // タイマー管理
     const timeouts = [];
     const spinners = [];
-    function clearAllTimeouts(){
-      while(timeouts.length){ clearTimeout(timeouts.pop()); }
-    }
+    function clearAllTimeouts(){ while(timeouts.length){ clearTimeout(timeouts.pop()); } }
     function schedule(fn, delayMs, startMs){
       const handle = setTimeout(fn, Math.max(0, startMs + delayMs - performance.now()));
       timeouts.push(handle);
@@ -182,6 +177,7 @@
       k.classList.add("flash");
       setTimeout(()=>k.classList.remove("flash"), 120);
     }
+
     // スロット回転
     function startSpin(){
       boxes.forEach((box)=>{
@@ -200,17 +196,14 @@
       });
     }
     function stopBox(index){
-      if (spinners[index]) {
-        clearInterval(spinners[index]);
-        spinners[index] = null;
-      }
+      if (spinners[index]) { clearInterval(spinners[index]); spinners[index] = null; }
       boxes[index].classList.remove("spinning");
       boxes[index].classList.add("stopped");
-      flashKey(); // 止めた瞬間に鍵盤を光らせる
+      flashKey();
       return boxes[index].textContent;
     }
 
-    // ===== 実行シーケンス（方式①：固定タイミング） =====
+    // 実行シーケンス（方式①：固定タイミング）
     async function runSequence(){
       // リセット
       clearAllTimeouts();
@@ -226,7 +219,7 @@
         bgm.currentTime = 0;
         await bgm.play();
       } catch(e) {
-        console.warn("音声の自動再生がブロックされました。ボタンをもう一度押してください。", e);
+        console.warn("音声の自動再生がブロックされました。", e);
         return;
       }
 
@@ -238,23 +231,23 @@
       // 1) たたたたーん → テキスト
       schedule(()=>{ line.classList.add("show"); }, cues.line, start);
 
-      // 2) たらららたらららーん → 身長
+      // 2) 身長
       let picked = {height:"", face:"", mbti:"", age:"", country:""};
       schedule(()=>{ picked.height  = stopBox(0); }, cues.height, start);
 
-      // 3) たらららたらららーん → 顔
+      // 3) 顔
       schedule(()=>{ picked.face    = stopBox(1); }, cues.face, start);
 
-      // 4) たたたたーん → MBTI
+      // 4) MBTI
       schedule(()=>{ picked.mbti    = stopBox(2); }, cues.mbti, start);
 
-      // 5) たたたたーん → 年齢
+      // 5) 年齢
       schedule(()=>{ picked.age     = stopBox(3); }, cues.age, start);
 
-      // 6) たたたたん → 国籍
+      // 6) 国籍
       schedule(()=>{ picked.country = stopBox(4); }, cues.country, start);
 
-      // 7) たったたーん → まとめ
+      // 7) まとめ表示
       schedule(()=>{
         const label = `${picked.country} / ${picked.height} / ${picked.face} / ${picked.mbti} / ${picked.age}`;
         summary.textContent = `おめでとうございます！\n${label}\nが運命の相手です。`;
@@ -264,15 +257,15 @@
 
     // ボタン操作
     let busy = false;
-    btn.addEventListener("click", async ()=>{
+    document.querySelector(".cta").addEventListener("click", async ()=>{
       if (busy) return;
       busy = true;
       await runSequence();
-      // 一巡したら再プレイ可（曲長に応じて調整）
+      // 曲の長さに合わせて適宜調整（ここは安全マージン）
       setTimeout(()=>{ busy = false; }, 22000);
     });
 
-    // ページ離脱時に後片付け
+    // 後片付け
     window.addEventListener("pagehide", ()=>{ bgm.pause(); clearAllTimeouts(); });
     window.addEventListener("beforeunload", ()=>{ bgm.pause(); clearAllTimeouts(); });
   })();
