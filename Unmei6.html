@@ -112,6 +112,8 @@
   }
   .spinning{ filter:saturate(1.2) brightness(1.1); box-shadow:0 0 18px rgba(216,189,106,.6); }
   .stopped{ filter:none; }
+
+  /* ▶ ボタン（据え置き） */
   .cta{
     position:absolute; left:50%; top:340px; transform:translateX(-50%);
     background:linear-gradient(90deg,#8b0000,#b30000); color:var(--gold);
@@ -128,27 +130,29 @@
   .flash{ box-shadow:0 0 22px rgba(216,189,106,.9)!important; filter:brightness(2) saturate(1.2); }
 
   .footer-note{ position:absolute; left:50%; bottom:8px; transform:translateX(-50%); font-size:14px; opacity:.85; }
+
+  /* ====== 結果表示 ====== */
   .result-line, .result-summary{
     position:absolute; left:50%; transform:translateX(-50%); text-shadow:0 0 18px rgba(216,189,106,.9);
     opacity:0; transition:opacity .9s ease; text-align:center; white-space:pre-wrap; letter-spacing:2px;
   }
-  .result-line{ top:460px; font-size:28px; }
-  .result-summary{ top:520px; font-size:22px; }
+  /* ▶ 「あなたの運命の相手は…」をボタンの上に */
+  .result-line{ top:300px; font-size:28px; }
+  /* ▶ 本文は少し上めに（読みやすい位置） */
+  .result-summary{ top:490px; font-size:22px; max-width:92vw; line-height:1.6; }
+
   .show{ opacity:1; }
 
-  /* 右上：アカウント名とログアウト */
-  .account-chip{
-    position:absolute; right:16px; top:14px; font-size:14px;
-    background:#1b1212; border:1px solid rgba(216,189,106,.35); border-radius:999px;
-    padding:6px 12px; box-shadow:0 0 16px rgba(216,189,106,.15);
+  /* ▶ 「あなた（…）」だけに背景プレートを付ける */
+  .me-plate{
+    display:inline-block;
+    padding:10px 18px;
+    border-radius:14px;
+    background:linear-gradient(180deg,rgba(0,0,0,.6),rgba(0,0,0,.4));
+    border:1px solid rgba(216,189,106,.4);
+    box-shadow:0 10px 25px rgba(0,0,0,.45), inset 0 0 25px rgba(216,189,106,.15);
+    backdrop-filter:blur(4px);
   }
-  .logout-btn{
-    position:absolute; right:16px; top:50px; font-size:14px;
-    padding:8px 12px; border-radius:10px; border:1px solid var(--gold);
-    background:#1b1212; color:var(--gold); cursor:pointer;
-    box-shadow:0 0 16px rgba(216,189,106,.15);
-  }
-  .logout-btn:hover{ filter:brightness(1.1); }
 
   /* ===== 紹介ページ ===== */
   .cards{ display:flex; gap:18px; flex-wrap:wrap; justify-content:center; }
@@ -252,6 +256,7 @@
         <div class="slot-box" data-field="country">国籍</div>
       </div>
 
+      <div class="result-line" id="resultLine">あなたの運命の相手は...</div>
       <button class="cta" aria-label="運命を奏でる（スタート）">運命を奏でる</button>
 
       <audio id="bgm" preload="auto" playsinline>
@@ -270,7 +275,6 @@
 
       <div class="footer-note">© 2025 Unmei Project</div>
 
-      <div class="result-line" id="resultLine">あなたの運命の相手は...</div>
       <div class="result-summary" id="resultSummary"></div>
     </div>
   </div>
@@ -495,6 +499,9 @@
     return scored.slice(0,k);
   }
 
+  function nl2br(s){ return s.replace(/\n/g,'<br>'); }
+  function escapeHTML(s){ return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
   function renderIntro(top3){
     introCards.innerHTML='';
     if(!top3 || !top3.length){
@@ -506,11 +513,11 @@
       card.className='card';
       const imgSrc = u.img || defaultAvatar;
       card.innerHTML = `
-        <img src="${imgSrc}" alt="${u.displayName}">
+        <img src="${imgSrc}" alt="${escapeHTML(u.displayName||'user')}">
         <div class="meta">
-          <strong>${u.displayName}</strong><br>
-          ${u.mbti || 'MBTI不明'} / ${u.face || '顔:不明'}<br>
-          ${u.country || '国籍:不明'}<br>
+          <strong>${escapeHTML(u.displayName||'名無し')}</strong><br>
+          ${escapeHTML(u.mbti || 'MBTI不明')} / ${escapeHTML(u.face || '顔:不明')}<br>
+          ${escapeHTML(u.country || '国籍:不明')}<br>
           <small>マッチ度：${score}%</small>
         </div>
         <button class="btn send-btn" data-id="${u.id}">💌 メッセージを送る</button>
@@ -535,7 +542,7 @@
   }
 
   async function runSequence(){
-    clearAll(); line.classList.remove("show"); summary.classList.remove("show"); summary.textContent="";
+    clearAll(); line.classList.remove("show"); summary.classList.remove("show"); summary.innerHTML="";
     boxes.forEach(b=>b.classList.remove("stopped"));
 
     await new Promise((resolve)=>{
@@ -560,23 +567,29 @@
     schedule(()=>{
       const label=`${picked.country} / ${picked.height} / ${picked.face} / ${picked.mbti} / ${picked.age}`;
       const me=getCurrentUser();
-      const meLine=me?`\n\nあなた（${me.displayName} / ${me.age?me.age+'歳':'年齢:不明'} / ${me.face||'顔:不明'} / ${me.mbti||'MBTI:不明'} / ${me.country||'国籍:不明'}）`:"";
+      const meLine = me
+        ? `<br><br><span class="me-plate">あなた（${escapeHTML(me.displayName)} / ${me.age?escapeHTML(me.age)+'歳':'年齢:不明'} / ${escapeHTML(me.face||'顔:不明')} / ${escapeHTML(me.mbti||'MBTI:不明')} / ${escapeHTML(me.country||'国籍:不明')}）</span>`
+        : '';
 
-      let top3Text='';
+      let top3Html='';
       if(me){
         const top3=rankTopMatches(me,3).filter(x=>x.u);
         if(top3.length){
           const lines=top3.map((it,i)=>{
-            const u=it.u; return ` ${i+1}. ${u.displayName}（${u.mbti||'MBTI不明'} / ${u.face||'顔:不明'} / ${u.country||'国籍:不明'}） - マッチ度：${it.score}%`;
-          }).join('\n');
-          top3Text=`\n\n🎼 運命の旋律を奏でた相手（上位3人）\n${lines}`;
-        }else{ top3Text=`\n\n💞 他の登録ユーザーがいません。`; }
+            const u=it.u;
+            return ` ${i+1}. ${escapeHTML(u.displayName||'名無し')}（${escapeHTML(u.mbti||'MBTI不明')} / ${escapeHTML(u.face||'顔:不明')} / ${escapeHTML(u.country||'国籍:不明')}） - マッチ度：${it.score}%`;
+          }).join('<br>');
+          top3Html=`<br><br>🎼 運命の旋律を奏でた相手（上位3人）<br>${lines}`;
+        }else{
+          top3Html=`<br><br>💞 他の登録ユーザーがいません。`;
+        }
       }else{
-        top3Text=`\n\n💞 ログインして自分を登録すると、あなたに合う相手をご紹介できます。`;
+        top3Html=`<br><br>💞 ログインして自分を登録すると、あなたに合う相手をご紹介できます。`;
       }
-      const ending=`\n\nこれは偶然の旋律か、\nそれとも──運命のデュエットか。`;
+      const ending=`<br><br>これは偶然の旋律か、<br>それとも──運命のデュエットか。`;
 
-      summary.textContent=`おめでとうございます！\n${label}\nが運命の相手です。`+meLine+top3Text+ending;
+      const congrats = `おめでとうございます！<br>${escapeHTML(label)}<br>が運命の相手です。`;
+      summary.innerHTML = congrats + meLine + top3Html + ending;
       summary.classList.add("show");
     }, cues.summary, start);
 
@@ -606,7 +619,6 @@
   });
   cancelLogoutBtn.addEventListener('click', ()=> goMain());
 
- 
   /* 既にログイン済みならメインへ */
   if(getCurrentUser()){ goMain(); }
 })();
@@ -644,7 +656,6 @@
   const backToIntro = document.getElementById('backToIntro');
   const chatWindow = document.getElementById('chatWindow');
   const chatInput = document.getElementById('chatInput');
-  const sendMsgBtn = document.getElementById('sendMsg');
 
   // 「もっと見る」ボタンを最後のdividerの直後に追加
   const moreBtn = document.createElement('button');
@@ -688,9 +699,9 @@
       card.className='card';
       const imgSrc = u.img || defaultAvatar;
       card.innerHTML = `
-        <img src="${imgSrc}" alt="${u.displayName}">
+        <img src="${imgSrc}" alt="${(u.displayName||'user')}">
         <div class="meta">
-          <strong>${u.displayName}</strong><br>
+          <strong>${(u.displayName||'名無し')}</strong><br>
           ${u.mbti} / ${u.face}<br>
           ${u.country}<br>
           <small>${u.age}歳</small>
@@ -712,7 +723,6 @@
   /* ===== チャット画面 ===== */
   let currentPartner = null;
   function goChat(u){
-    // 画面切替
     document.getElementById('main').classList.add('hidden');
     document.getElementById('home').classList.add('hidden');
     document.getElementById('logout').classList.add('hidden');
@@ -746,7 +756,6 @@
     const box=loadMsgs();
     box[currentPartner.id]=box[currentPartner.id]||[];
     box[currentPartner.id].push({from:'me',text});
-    // 自動返信
     setTimeout(()=>{
       box[currentPartner.id].push({from:'them',text:'ありがとう'});
       saveMsgs(box);
@@ -762,11 +771,11 @@
     intro.classList.remove('hidden');
   });
 
-  // 初回：ログイン有無に関係なくランダム3人で埋める
+  // 初回：ランダム3人
   let currentList=generateFakeProfiles(3);
   renderIntro(currentList);
 
-  // もっと見る→新しい3人に差替え
+  // もっと見る→差し替え
   moreBtn.addEventListener('click',()=>{
     currentList=generateFakeProfiles(3);
     renderIntro(currentList);
@@ -774,4 +783,4 @@
 })();
 </script>
 </body>
-</html>  
+</html>
