@@ -174,7 +174,7 @@
   }
   .result-line{ top:300px; font-size:28px; }         /* 「あなたの運命の相手は…」 */
   .result-me{ top:400px; font-size:20px; }           /* あなたのプロフィール行（独立） */
-  .result-summary{ top:480px; font-size:22px; max-width:92vw; } /* ← 少し上へ（520→495） */
+  .result-summary{ top:475px; font-size:22px; max-width:92vw; } /* ← 少し上へ（520→495） */
 
   .show{ opacity:1; }
 
@@ -557,7 +557,7 @@
           ${u.country || '国籍:不明'}<br>
           <small>マッチ度：${score}%</small>
         </div>
-        <button class="btn send-btn" data-id="${u.id}">💌 メッセージを送る</button>
+        <button class="btn send-btn" data-id="${u.id}"> メッセージを送る</button>
       `;
       introCards.appendChild(card);
     });
@@ -572,7 +572,7 @@
         box[tid] = box[tid] || [];
         box[tid].push({ from: meId, text: msg, time: Date.now() });
         localStorage.setItem(MSGS_KEY, JSON.stringify(box));
-        alert('メッセージを送信しました💌');
+        alert('メッセージを送信しました');
       });
     });
   }
