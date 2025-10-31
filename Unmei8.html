@@ -112,6 +112,8 @@
   }
   .spinning{ filter:saturate(1.2) brightness(1.1); box-shadow:0 0 18px rgba(216,189,106,.6); }
   .stopped{ filter:none; }
+
+  /* ボタン（そのまま） */
   .cta{
     position:absolute; left:50%; top:340px; transform:translateX(-50%);
     background:linear-gradient(90deg,#8b0000,#b30000); color:var(--gold);
@@ -128,28 +130,28 @@
   .flash{ box-shadow:0 0 22px rgba(216,189,106,.9)!important; filter:brightness(2) saturate(1.2); }
 
   .footer-note{ position:absolute; left:50%; bottom:8px; transform:translateX(-50%); font-size:14px; opacity:.85; }
+
+  /* ====== 結果表示 ====== */
   .result-line, .result-summary{
     position:absolute; left:50%; transform:translateX(-50%); text-shadow:0 0 18px rgba(216,189,106,.9);
     opacity:0; transition:opacity .9s ease; text-align:center; white-space:pre-wrap; letter-spacing:2px;
-    z-index:4; /* ボタンより背面にならないよう保証 */
   }
-  .result-line{ top:460px; font-size:28px; }
-  .result-summary{ top:520px; font-size:22px; }
+  /* ▶ 「あなたの運命の相手は…」をボタンの上に移動 */
+  .result-line{ top:300px; font-size:28px; }   /* ← ここだけ位置変更 */
+  .result-summary{ top:520px; font-size:22px; max-width:92vw; }
+
   .show{ opacity:1; }
 
-  /* 右上：アカウント名とログアウト */
-  .account-chip{
-    position:absolute; right:16px; top:14px; font-size:14px;
-    background:#1b1212; border:1px solid rgba(216,189,106,.35); border-radius:999px;
-    padding:6px 12px; box-shadow:0 0 16px rgba(216,189,106,.15);
+  /* ▶ #resultSummary にだけ背景プレートを付与 */
+  #resultSummary{
+    display:inline-block;
+    background:linear-gradient(180deg,rgba(0,0,0,.6),rgba(0,0,0,.4));
+    border:1px solid rgba(216,189,106,.4);
+    border-radius:14px;
+    padding:14px 22px;
+    box-shadow:0 10px 25px rgba(0,0,0,.45), inset 0 0 25px rgba(216,189,106,.15);
+    backdrop-filter:blur(4px);
   }
-  .logout-btn{
-    position:absolute; right:16px; top:50px; font-size:14px;
-    padding:8px 12px; border-radius:10px; border:1px solid var(--gold);
-    background:#1b1212; color:var(--gold); cursor:pointer;
-    box-shadow:0 0 16px rgba(216,189,106,.15);
-  }
-  .logout-btn:hover{ filter:brightness(1.1); }
 
   /* ===== 紹介ページ ===== */
   .cards{ display:flex; gap:18px; flex-wrap:wrap; justify-content:center; }
@@ -164,46 +166,6 @@
   .card .btn{ margin-top:8px; width:100%; }
 
   @media (max-width:980px){ .auth-pane.active{ grid-template-columns:1fr; } }
-
-  /* ===== 可読性UP：文字の後ろにプレートを敷く（追加） ===== */
-  :root{
-    --plate-bg1: rgba(0,0,0,.58);
-    --plate-bg2: rgba(0,0,0,.38);
-    --plate-brd: rgba(216,189,106,.35);
-    --plate-inset: rgba(216,189,106,.10);
-  }
-  h2.app-title,
-  .subtitle,
-  .result-line,
-  .result-summary,
-  .footer-note,
-  .account-chip,
-  .logout-btn,
-  #intro .tagline {
-    display:inline-block;
-    padding:.45em .9em;
-    border-radius:12px;
-    background:linear-gradient(180deg,var(--plate-bg1),var(--plate-bg2));
-    border:1px solid var(--plate-brd);
-    box-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 0 22px var(--plate-inset);
-    backdrop-filter: blur(3px);
-  }
-  h2.app-title{
-    padding:.35em .8em;
-    text-shadow:0 0 14px rgba(216,189,106,.65);
-  }
-  .result-line,.result-summary{
-    white-space:pre-wrap;
-    line-height:1.45;
-    letter-spacing:1.5px;
-  }
-  .account-chip,.logout-btn{ padding:.35em .8em; border-radius:10px; }
-  @media (max-width:720px){
-    h2.app-title, .subtitle, .result-line, .result-summary,
-    .footer-note, .account-chip, .logout-btn, #intro .tagline{
-      padding:.35em .7em; border-radius:10px; backdrop-filter: blur(2px);
-    }
-  }
 </style>
 </head>
 <body>
@@ -537,7 +499,6 @@
   }
 
   function renderIntro(top3){
-    const introCards = document.getElementById('introCards');
     introCards.innerHTML='';
     if(!top3 || !top3.length){
       introCards.innerHTML = '<div class="note">他の登録ユーザーがいません。ホームからユーザーを追加してください。</div>';
@@ -546,7 +507,7 @@
     top3.forEach(({u,score})=>{
       const card=document.createElement('div');
       card.className='card';
-      const imgSrc = u.img || 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><rect width="100%" height="100%" fill="black"/><circle cx="150" cy="120" r="70" fill="#333"/><rect x="60" y="200" width="180" height="80" rx="40" fill="#333"/></svg>`);
+      const imgSrc = u.img || defaultAvatar;
       card.innerHTML = `
         <img src="${imgSrc}" alt="${u.displayName}">
         <div class="meta">
@@ -560,17 +521,17 @@
       introCards.appendChild(card);
     });
 
-    // 送信（ダミー保存）
+    // 送信
     introCards.querySelectorAll('.send-btn').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const tid = btn.dataset.id;
         const msg = prompt('相手にメッセージを送ります：');
         if(!msg) return;
-        const meId = localStorage.getItem("unmeiCurrentUserId");
-        const box = JSON.parse(localStorage.getItem("unmeiMsgs") || '{}');
+        const meId = getCurrentId();
+        const box = JSON.parse(localStorage.getItem(MSGS_KEY) || '{}');
         box[tid] = box[tid] || [];
-        box[tid].push({ from: meId || 'me', text: msg, time: Date.now() });
-        localStorage.setItem("unmeiMsgs", JSON.stringify(box));
+        box[tid].push({ from: meId, text: msg, time: Date.now() });
+        localStorage.setItem(MSGS_KEY, JSON.stringify(box));
         alert('メッセージを送信しました💌');
       });
     });
@@ -648,6 +609,7 @@
   });
   cancelLogoutBtn.addEventListener('click', ()=> goMain());
 
+
   /* 既にログイン済みならメインへ */
   if(getCurrentUser()){ goMain(); }
 })();
@@ -685,6 +647,7 @@
   const backToIntro = document.getElementById('backToIntro');
   const chatWindow = document.getElementById('chatWindow');
   const chatInput = document.getElementById('chatInput');
+  const sendMsgBtn = document.getElementById('sendMsg');
 
   // 「もっと見る」ボタンを最後のdividerの直後に追加
   const moreBtn = document.createElement('button');
@@ -696,6 +659,7 @@
   const USERS_KEY="unmeiUsers", MSGS_KEY="unmeiMsgs";
   const defaultAvatar = 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><rect width="100%" height="100%" fill="black"/><circle cx="150" cy="120" r="70" fill="#333"/><rect x="60" y="200" width="180" height="80" rx="40" fill="#333"/></svg>`);
 
+  function loadUsers(){ try{ return JSON.parse(localStorage.getItem(USERS_KEY)||"[]"); }catch(_){ return []; } }
   function saveMsgs(box){ localStorage.setItem(MSGS_KEY, JSON.stringify(box)); }
   function loadMsgs(){ try{ return JSON.parse(localStorage.getItem(MSGS_KEY)||"{}"); }catch(_){ return {}; } }
 
@@ -742,7 +706,8 @@
     introCards.querySelectorAll('.send-btn').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const id = btn.dataset.id;
-        goChat(list.find(x=>x.id===id));
+        const u = list.find(x=>x.id===id);
+        goChat(u);
       });
     });
   }
@@ -750,6 +715,7 @@
   /* ===== チャット画面 ===== */
   let currentPartner = null;
   function goChat(u){
+    // 画面切替
     document.getElementById('main').classList.add('hidden');
     document.getElementById('home').classList.add('hidden');
     document.getElementById('logout').classList.add('hidden');
@@ -764,7 +730,7 @@
   function renderChat(){
     chatWindow.innerHTML='';
     const box=loadMsgs();
-    const msgs=box[currentPartner?.id]||[];
+    const msgs=box[currentPartner.id]||[];
     msgs.forEach(m=>{
       const wrap=document.createElement('div');
       wrap.className='chat-msg';
@@ -783,6 +749,7 @@
     const box=loadMsgs();
     box[currentPartner.id]=box[currentPartner.id]||[];
     box[currentPartner.id].push({from:'me',text});
+    // 自動返信
     setTimeout(()=>{
       box[currentPartner.id].push({from:'them',text:'ありがとう'});
       saveMsgs(box);
@@ -798,7 +765,7 @@
     intro.classList.remove('hidden');
   });
 
-  // 初回：ランダム3人で表示
+  // 初回：ログイン有無に関係なくランダム3人で埋める
   let currentList=generateFakeProfiles(3);
   renderIntro(currentList);
 
