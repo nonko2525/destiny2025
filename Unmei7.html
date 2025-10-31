@@ -10,7 +10,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-  :root { --gold:#d8bd6a; --gold-glow:rgba(216,189,106,.85); }
+  :root { 
+    --gold:#d8bd6a; 
+    --gold-glow:rgba(216,189,106,.85);
+    /* 鍵盤を避ける安全余白（ステージ座標） */
+    --safe-bottom: 330px; /* = 鍵盤 280px + 余白 50px */
+  }
 
   *{ box-sizing:border-box; }
   html,body{ height:100%; }
@@ -122,18 +127,33 @@
   .cta:hover{ transform:translateX(-50%) translateY(-1px) scale(1.04); box-shadow:0 0 35px rgba(216,189,106,.8); filter:brightness(1.05); }
   .cta:active{ transform:translateX(-50%) translateY(0) scale(.98); box-shadow:0 0 22px rgba(216,189,106,.6); }
 
-  .keys{ position:absolute; left:50%; bottom:0; transform:translateX(-50%); display:flex; gap:2px; padding:8px 0 10px; pointer-events:none; }
+  .keys{ position:absolute; left:50%; bottom:0; transform:translateX(-50%); display:flex; gap:2px; padding:8px 0 10px; pointer-events:none; z-index:0; }
   .key{ width:64px; height:280px; background:linear-gradient(to bottom,#fff,#ddd); border:1px solid #444; border-radius:4px; position:relative; box-shadow:0 4px 10px rgba(255,255,255,.08); }
   .key.black{ width:42px; height:180px; background:linear-gradient(to bottom,#111,#000); margin:0 -21px; z-index:2; border-color:#222; box-shadow:0 4px 10px rgba(0,0,0,.35); }
   .flash{ box-shadow:0 0 22px rgba(216,189,106,.9)!important; filter:brightness(2) saturate(1.2); }
 
-  .footer-note{ position:absolute; left:50%; bottom:8px; transform:translateX(-50%); font-size:14px; opacity:.85; }
-  .result-line, .result-summary{
-    position:absolute; left:50%; transform:translateX(-50%); text-shadow:0 0 18px rgba(216,189,106,.9);
-    opacity:0; transition:opacity .9s ease; text-align:center; white-space:pre-wrap; letter-spacing:2px;
+  /* 鍵盤の上にうっすらフェード（読みやすさ向上） */
+  .keys-fade{
+    position:absolute; left:0; right:0; bottom:0;
+    height:340px;
+    background:linear-gradient(to top, rgba(0,0,0,.55), rgba(0,0,0,0));
+    pointer-events:none;
+    z-index:1;
   }
-  .result-line{ top:460px; font-size:28px; }
-  .result-summary{ top:520px; font-size:22px; }
+
+  .footer-note{ position:absolute; left:50%; bottom:8px; transform:translateX(-50%); font-size:14px; opacity:.85; }
+
+  /* 結果テキスト：bottom 固定にして鍵盤と重ならない */
+  .result-line, .result-summary{
+    position:absolute; left:50%; transform:translateX(-50%);
+    text-shadow:0 0 18px rgba(216,189,106,.9);
+    opacity:0; transition:opacity .9s ease; text-align:center; white-space:pre-wrap; letter-spacing:2px;
+    background:rgba(0,0,0,.22); backdrop-filter:blur(2px);
+    padding:8px 12px; border-radius:12px; z-index:2;
+  }
+  .result-line{ bottom: calc(var(--safe-bottom) + 70px); font-size:28px; }
+  .result-summary{ bottom: var(--safe-bottom); font-size:22px; }
+
   .show{ opacity:1; }
 
   /* 右上：アカウント名とログアウト */
@@ -268,6 +288,9 @@
         <div class="key"></div><div class="key black"></div><div class="key"></div><div class="key black"></div><div class="key"></div>
       </div>
 
+      <!-- 追加：鍵盤上のフェード -->
+      <div class="keys-fade" aria-hidden="true"></div>
+
       <div class="footer-note">© 2025 Unmei Project</div>
 
       <div class="result-line" id="resultLine">あなたの運命の相手は...</div>
@@ -329,8 +352,8 @@
   function fitStage(){
     if(!stage) return;
     const wrap = stage.parentElement;
-    const sw = wrap.clientWidth, sh = wrap.clientHeight;
-    const scale = Math.min(sw/BASE_W, sh/BASE_H);
+    the_sw = wrap.clientWidth, sh = wrap.clientHeight;
+    const scale = Math.min(the_sw/BASE_W, sh/BASE_H);
     stage.style.transform = `translate(-50%, -50%) scale(${scale})`;
   }
   window.addEventListener('resize', fitStage);
@@ -496,7 +519,9 @@
   }
 
   function renderIntro(top3){
+    const introCards=document.getElementById('introCards');
     introCards.innerHTML='';
+    const defaultAvatar = 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><rect width="100%" height="100%" fill="black"/><circle cx="150" cy="120" r="70" fill="#333"/><rect x="60" y="200" width="180" height="80" rx="40" fill="#333"/></svg>`);
     if(!top3 || !top3.length){
       introCards.innerHTML = '<div class="note">他の登録ユーザーがいません。ホームからユーザーを追加してください。</div>';
       return;
@@ -525,10 +550,10 @@
         const msg = prompt('相手にメッセージを送ります：');
         if(!msg) return;
         const meId = getCurrentId();
-        const box = JSON.parse(localStorage.getItem(MSGS_KEY) || '{}');
+        const box = JSON.parse(localStorage.getItem("unmeiMsgs") || '{}');
         box[tid] = box[tid] || [];
         box[tid].push({ from: meId, text: msg, time: Date.now() });
-        localStorage.setItem(MSGS_KEY, JSON.stringify(box));
+        localStorage.setItem("unmeiMsgs", JSON.stringify(box));
         alert('メッセージを送信しました💌');
       });
     });
@@ -606,7 +631,6 @@
   });
   cancelLogoutBtn.addEventListener('click', ()=> goMain());
 
- 
   /* 既にログイン済みならメインへ */
   if(getCurrentUser()){ goMain(); }
 })();
@@ -644,7 +668,6 @@
   const backToIntro = document.getElementById('backToIntro');
   const chatWindow = document.getElementById('chatWindow');
   const chatInput = document.getElementById('chatInput');
-  const sendMsgBtn = document.getElementById('sendMsg');
 
   // 「もっと見る」ボタンを最後のdividerの直後に追加
   const moreBtn = document.createElement('button');
@@ -762,7 +785,7 @@
     intro.classList.remove('hidden');
   });
 
-  // 初回：ログイン有無に関係なくランダム3人で埋める
+  // 初回：ランダム3人で埋める
   let currentList=generateFakeProfiles(3);
   renderIntro(currentList);
 
@@ -774,4 +797,4 @@
 })();
 </script>
 </body>
-</html>  
+</html>
